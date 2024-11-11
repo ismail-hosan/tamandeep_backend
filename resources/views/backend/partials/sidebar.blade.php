@@ -43,7 +43,7 @@
                   <i class="menu-icon tf-icons bx bx-cog"></i>
                   <div data-i18n="Layouts">Booking</div>
               </a>
-  
+
               <ul class="menu-sub">
                   <li class="menu-item">
                       <a class="menu-link" href="">All Booking</a>
@@ -74,6 +74,13 @@
             <ul class="menu-sub">
                 <li class="menu-item">
                     <a class="menu-link" href="{{route('features.index')}}">Features</a>
+                </li>
+            </ul>
+
+            {{-- Review --}}
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a class="menu-link" href="{{route('review.index')}}">Reviews</a>
                 </li>
             </ul>
         </li>

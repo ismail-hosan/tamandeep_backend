@@ -1,6 +1,6 @@
 @extends('backend.app')
 
-@section('title', 'Features')
+@section('title', 'Reviews')
 
 @push('style')
     <style>
@@ -15,17 +15,18 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Features</h4>
-                        <div style="display: flex;justify-content: end;"><a
-                                href="{{route('features.create')}}" class="btn btn-primary">Add Features</a></div>
+                        <h4 class="card-title">Reviews</h4>
+                        <div style="display: flex;justify-content: end;"><a href="{{ route('review.create') }}"
+                                class="btn btn-primary">Add Review</a></div>
                         <div class="table-responsive mt-4 p-4">
                             <table class="table table-hover" id="data-table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>User</th>
                                         <th>Title</th>
                                         <th>Description</th>
-                                        <th>Image</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -84,7 +85,7 @@
                     pagingType: "full_numbers",
                     dom: "<'row justify-content-between table-topbar'<'col-md-2 col-sm-4 px-0'l><'col-md-2 col-sm-4 px-0'f>>tipr",
                     ajax: {
-                        url: "{{route('features.index')}}",
+                        url: "{{ route('review.index') }}",
                         type: "get",
                     },
 
@@ -93,6 +94,12 @@
                             name: 'DT_RowIndex',
                             orderable: false,
                             searchable: false
+                        },
+                        {
+                            data: 'user_id',
+                            name: 'user_id',
+                            orderable: true,
+                            searchable: true
                         },
                         {
                             data: 'title',
@@ -105,12 +112,6 @@
                             name: 'description',
                             orderable: true,
                             searchable: true
-                        },
-                        {
-                            data: 'image',
-                            name: 'image',
-                            orderable: false,
-                            searchable: false
                         },
                         {
                             data: 'status',
@@ -154,7 +155,7 @@
         };
         // Delete Button
         function deleteItem(id) {
-            var url = '{{ route('features.delete', ':id') }}';
+            var url = '{{ route('review.delete', ':id') }}';
             var csrfToken = '{{ csrf_token() }}';
             $.ajax({
                 type: "DELETE",
@@ -225,8 +226,6 @@
                 } // Erro
             });
         }
-
-
 
 
     </script>

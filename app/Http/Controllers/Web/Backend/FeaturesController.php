@@ -17,7 +17,7 @@ class FeaturesController extends Controller
             $data = Features::latest();
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->addColumn('image', function($data) {
+                ->addColumn('image', function ($data) {
                     // Check if the image path exists and return the image tag
                     if ($data->image && file_exists(public_path($data->image))) {
                         return '<img src="' . asset($data->image) . '" width="100px" alt="Category Image">';
@@ -47,9 +47,8 @@ class FeaturesController extends Controller
 
                     return $status;
                 })
-                ->rawColumns(['action','status','image'])
+                ->rawColumns(['action', 'status', 'image'])
                 ->make(true);
-
         }
 
         return view('backend.layout.cms.features.index');
@@ -75,7 +74,7 @@ class FeaturesController extends Controller
             if ($request->hasFile('image')) {
                 $imagePath = ImageHelper::handleImageUpload($request->file('image'), null, '/cms/featurs/section');
             } else {
-                $imagePath = null; 
+                $imagePath = null;
             }
 
             $data = new Features();
@@ -86,9 +85,9 @@ class FeaturesController extends Controller
             $data->save();
             // Check if the category was created successfully
             if ($data) {
-                return redirect()->action([self::class,'index'])->with('t-success', 'Category created successfully.');
+                return redirect()->action([self::class, 'index'])->with('t-success', 'Category created successfully.');
             } else {
-                return redirect()->action([self::class,'index'])->with('t-error', 'Category creation failed.');
+                return redirect()->action([self::class, 'index'])->with('t-error', 'Category creation failed.');
             }
         } catch (\Exception $e) {
             \Log::error("Category creation failed: " . $e->getMessage());
@@ -104,65 +103,62 @@ class FeaturesController extends Controller
 
     public function update(Request $request, $id)
     {
-    // Validation rules
-    $request->validate([
-        'title' => 'required|max:255',
-        'description' => 'required',
-        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
-    ]);
+        // Validation rules
+        $request->validate([
+            'title' => 'required|max:255',
+            'description' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
+        ]);
 
-    try {
-        // Find the existing feature by ID
-        $data = Features::findOrFail($id);
+        try {
+            // Find the existing feature by ID
+            $data = Features::findOrFail($id);
 
-        // Handle image upload if there is a new image
-        if ($request->hasFile('image')) {
-            $imagePath = ImageHelper::handleImageUpload($request->file('image'), $data->image, '/cms/features/section');
-        } else {
-            $imagePath = $data->image;
+            // Handle image upload if there is a new image
+            if ($request->hasFile('image')) {
+                $imagePath = ImageHelper::handleImageUpload($request->file('image'), $data->image, '/cms/features/section');
+            } else {
+                $imagePath = $data->image;
+            }
+
+            // Update the feature with the new data
+            $data->title = $request->input('title');
+            $data->description = $request->input('description');
+            $data->image = $imagePath;
+            $data->crated_at = Auth::user()->id; // Store the ID of the user who updated the feature
+            $data->save();
+
+            // Return success message upon successful update
+            return redirect()->action([self::class, 'index'])->with('t-success', 'Feature updated successfully.');
+        } catch (\Exception $e) {
+            // Log error message if something goes wrong
+            \Log::error("Feature update failed: " . $e->getMessage());
+
+            // Return error message on failure
+            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the feature.');
         }
-
-        // Update the feature with the new data
-        $data->title = $request->input('title');
-        $data->description = $request->input('description');
-        $data->image = $imagePath;
-        $data->crated_at = Auth::user()->id; // Store the ID of the user who updated the feature
-        $data->save();
-
-        // Return success message upon successful update
-        return redirect()->action([self::class, 'index'])->with('t-success', 'Feature updated successfully.');
-    } catch (\Exception $e) {
-        // Log error message if something goes wrong
-        \Log::error("Feature update failed: " . $e->getMessage());
-
-        // Return error message on failure
-        return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the feature.');
     }
+
+    public function destroy(string $id)
+    {
+        // Find the feature by ID
+        $data = Features::find($id);
+
+        // Check if the feature exists
+        if (!$data) {
+            return response()->json(['t-success' => false, 'message' => 'Data not found.']);
         }
 
-        public function destroy(string $id)
-        {
-            // Find the feature by ID
-            $data = Features::find($id);
-        
-            // Check if the feature exists
-            if (!$data) {
-                return response()->json(['t-success' => false, 'message' => 'Data not found.']);
-            }
-        
-            // Check if there is an associated image and delete it
-            if ($data->image && file_exists(public_path($data->image))) {
-                // Unlink the image file from storage
-                unlink(public_path($data->image));
-            }
-        
-            // Delete the feature record from the database
-            $data->delete();
-        
-            // Return a success response
-            return response()->json(['t-success' => true, 'message' => 'Deleted successfully.']);
+        // Check if there is an associated image and delete it
+        if ($data->image && file_exists(public_path($data->image))) {
+            // Unlink the image file from storage
+            unlink(public_path($data->image));
         }
 
+        // Delete the feature record from the database
+        $data->delete();
 
-
+        // Return a success response
+        return response()->json(['t-success' => true, 'message' => 'Deleted successfully.']);
+    }
 }
