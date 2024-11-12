@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\Backend\CMSController;
 use App\Http\Controllers\Web\Backend\DahboardController;
 use App\Http\Controllers\Web\Backend\FeaturesController;
+use App\Http\Controllers\Web\Backend\QrcodeController;
 use App\Http\Controllers\Web\Backend\SystemSettingController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,10 +69,11 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/edit/{id}', 'edit')->name('features.edit');
         Route::post('/update/{id}', 'update')->name('features.update');
         Route::delete('/delete/{id}', 'destroy')->name('features.delete');
-
-
+        Route::get('/status/{id}', 'status')->name('features.status');
 
     });
+
+    Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');
 });
 
 require __DIR__.'/auth.php';
