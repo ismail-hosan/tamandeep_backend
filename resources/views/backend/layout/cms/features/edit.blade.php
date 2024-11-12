@@ -1,6 +1,6 @@
 @extends('backend.app')
 
-@section('title', 'Edit Category')
+@section('title', 'Edit Features')
 
 @push('style')
     <style>

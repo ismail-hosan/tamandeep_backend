@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CMSController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,10 +26,16 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+// Cms Route
+Route::post('/cms', [CMSController::class, 'index']);
+
+
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/check', [AuthController::class, 'check']);
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
+    Route::post('/product/store',[ActionController::class, 'store']);
+    Route::get('/product/show',[ActionController::class, 'show']);
 });

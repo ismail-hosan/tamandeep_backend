@@ -31,6 +31,8 @@ class CMSController extends Controller
             'image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
             'description' => 'required|string',
         ]);
+
+        // dd($request->all());
         $firstImagePath = $data->image ?? null;
     
         try {

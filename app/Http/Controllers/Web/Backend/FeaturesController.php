@@ -163,6 +163,34 @@ class FeaturesController extends Controller
             return response()->json(['t-success' => true, 'message' => 'Deleted successfully.']);
         }
 
+        public function status($id)
+    {
+        $data = Features::where('id', $id)->first();
+        if ($data->status == 'active') {
+            // If the current status is active, change it to inactive
+            $data->status = 'inactive';
+            $data->save();
+
+            // Return JSON response indicating success with message and updated data
+            return response()->json([
+                'success' => false,
+                'message' => 'Unpublished Successfully.',
+                'data' => $data,
+            ]);
+        } else {
+            // If the current status is inactive, change it to active
+            $data->status = 'active';
+            $data->save();
+
+            // Return JSON response indicating success with a message and updated data.
+            return response()->json([
+                'success' => true,
+                'message' => 'Published Successfully.',
+                'data' => $data,
+            ]);
+        }
+    }
+
 
 
 }

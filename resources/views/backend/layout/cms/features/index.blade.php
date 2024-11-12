@@ -203,7 +203,7 @@
 
         // Status Change
         function statusChange(id) {
-            var url = '';
+            var url = '{{ route('features.status', ':id') }}';
             $.ajax({
                 type: "GET",
                 url: url.replace(':id', id),
@@ -225,9 +225,6 @@
                 } // Erro
             });
         }
-
-
-
 
     </script>
 @endpush
