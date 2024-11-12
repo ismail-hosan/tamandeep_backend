@@ -233,7 +233,6 @@ class AuthController extends Controller
 
             // Save the updated user data
             $authenticatedUser->save();
-            url('public/',$data->image)
 
             return response()->json([
                 'status' => 'success',
