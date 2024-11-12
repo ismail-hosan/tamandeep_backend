@@ -27,9 +27,6 @@ use App\Http\Controllers\Web\Backend\SystemSettingController;
 Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('/login', 'login');
-    // Route::post('/profile/update/user/{id}', 'ProfileUpdate');
-    Route::middleware('auth:sanctum')->post('/profile/update/user/{id}', 'ProfileUpdate');
-
 });
 
 // Cms Route
@@ -37,9 +34,23 @@ Route::post('/cms', [CMSController::class, 'index']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/check', [AuthController::class, 'check']);
-    Route::get('/logout', [AuthController::class, 'logout']);
-    Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
-    Route::post('/product/store', [ActionController::class, 'store']);
-    Route::get('/product/show', [ActionController::class, 'show']);
+
+
+    Route::controller(AuthController::class)->group(function () {
+        Route::get('/check', 'check');
+        Route::get('/logout', 'logout');
+        Route::delete('/delete-account', 'deleteAccount');
+        // Route::post('/profile/update/user/{id}', 'ProfileUpdate');
+        Route::post('/profile/update/user/{id}', 'ProfileUpdate');
+    });
+
+    Route::controller(ActionController::class)->group(function () {
+        Route::post('/product/store', 'store');
+        Route::get('/product/show', 'show');
+    });
+
+
+
+
+    
 });
