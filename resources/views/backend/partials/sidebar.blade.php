@@ -90,6 +90,13 @@
                     <a class="menu-link" href="{{route('brandlogo.index')}}">Brand Logos</a>
                 </li>
             </ul>
+
+            {{-- Plan Packages --}}
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a class="menu-link" href="{{route('planpackage.index')}}">Plan Packages</a>
+                </li>
+            </ul>
         </li>
 
 

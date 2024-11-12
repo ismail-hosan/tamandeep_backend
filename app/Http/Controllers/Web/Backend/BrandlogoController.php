@@ -64,7 +64,7 @@ class BrandlogoController extends Controller
         // Validation rules
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'required|in:Active,Inactive',
+            'status' => 'required|in:active,inactive',
         ]);
 
 
@@ -105,7 +105,7 @@ class BrandlogoController extends Controller
         // Validation rules
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'required|in:Active,Inactive',
+            'status' => 'required|in:active,inactive',
         ]);
 
         try {

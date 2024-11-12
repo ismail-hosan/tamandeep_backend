@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Backend\BrandlogoController;
+use App\Http\Controllers\Web\Backend\PlanPackageController;
 use App\Http\Controllers\Web\Backend\ReviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,17 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::post('/update/{id}', 'update')->name('brandlogo.update');
         Route::delete('/delete/{id}', 'destroy')->name('brandlogo.delete');
         Route::get('/status/{id}',  'status')->name('brandlogo.status');
+    });
+
+    // Route for PlanPackageController
+    Route::prefix('planpackage')->controller(PlanPackageController::class)->group(function () {
+        Route::get('/', 'index')->name('planpackage.index');
+        Route::get('/create', 'create')->name('planpackage.create');
+        Route::post('/store', 'store')->name('planpackage.store');
+        Route::get('/edit/{id}', 'edit')->name('planpackage.edit');
+        Route::post('/update/{id}', 'update')->name('planpackage.update');
+        Route::delete('/delete/{id}', 'destroy')->name('planpackage.delete');
+        Route::get('/status/{id}',  'status')->name('planpackage.status');
     });
 
  });

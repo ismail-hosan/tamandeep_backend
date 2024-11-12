@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Web\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Models\Review;
-use App\Models\User;
+use App\Models\PlanPackage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
-class ReviewController extends Controller
+class PlanPackageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,18 +15,18 @@ class ReviewController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Review::with('user')->latest();
+            $data = PlanPackage::latest();
             return DataTables::of($data)
                 ->addIndexColumn()
 
-                ->addColumn('user_id', function ($data) {
-                    return $data->user ? $data->user->name : 'N/A'; // Display user's name or 'N/A' if not found
-                })
+                // ->addColumn('user_id', function ($data) {
+                //     return $data->user ? $data->user->name : 'N/A'; // Display user's name or 'N/A' if not found
+                // })
 
                 ->addColumn('action', function ($data) {
 
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                                  <a href="' . route('review.edit',  $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
+                                  <a href="' . route('planpackage.edit',  $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
                                   <i class="bi bi-pencil"></i>
                                   </a>
                                   <a href="#" onclick="showDeleteConfirm(' . $data->id . ')" type="button" class="btn btn-danger text-white" title="Delete">
@@ -52,7 +50,7 @@ class ReviewController extends Controller
                 ->make(true);
         }
 
-        return view('backend.layout.cms.review.index');
+        return view('backend.layout.cms.planpackage.index');
     }
 
     /**
@@ -60,8 +58,7 @@ class ReviewController extends Controller
      */
     public function create()
     {
-        $users = User::all();
-        return view('backend.layout.cms.review.create', compact('users'));
+        return view('backend.layout.cms.planpackage.create');
     }
 
     /**
@@ -71,17 +68,20 @@ class ReviewController extends Controller
     {
         // Validation rules
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|max:255',
+            'price' => 'required|numeric|min:0.01',
             'description' => 'required',
             'status' => 'required|in:active,inactive',
         ]);
 
         try {
 
-            $data = new Review();
-            $data->user_id = $request->input('user_id');
+            $data = new PlanPackage();
             $data->title = $request->input('title');
+            // $data->price = $request->input('price');
+
+            $price = preg_replace('/[^\d.]/', '', $request->input('price'));
+            $data->price = $price;
             $data->description = $request->input('description');
             $data->status = $request->input('status');
 
@@ -89,13 +89,13 @@ class ReviewController extends Controller
             $data->save();
 
             if ($data) {
-                return redirect()->action([self::class, 'index'])->with('t-success', 'Review created successfully.');
+                return redirect()->action([self::class, 'index'])->with('t-success', 'Plan Package created successfully.');
             } else {
-                return redirect()->action([self::class, 'index'])->with('t-error', 'Review creation failed.');
+                return redirect()->action([self::class, 'index'])->with('t-error', 'Plan Package creation failed.');
             }
         } catch (\Exception $e) {
             // dd($e->getMessage());
-            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while creating the Review.');
+            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while creating the Plan Package.');
         }
     }
 
@@ -112,43 +112,45 @@ class ReviewController extends Controller
      */
     public function edit(string $id)
     {
-        $data = Review::find($id);
-        $users = User::all();
+        $data = PlanPackage::find($id);
 
-        return view('backend.layout.cms.review.edit', get_defined_vars());
+        return view('backend.layout.cms.planpackage.edit', get_defined_vars());
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'title' => 'required|max:255',
+            'price' => 'required|numeric|min:0.01',
             'description' => 'required',
             'status' => 'required|in:active,inactive',
         ]);
 
         try {
-            $data = Review::findOrFail($id);
+            $data = PlanPackage::findOrFail($id);
 
-            $data->user_id = $request->input('user_id');
             $data->title = $request->input('title');
+            // $data->price = $request->input('price');
+
+            $price = preg_replace('/[^\d.]/', '', $request->input('price'));
+            $data->price = $price;
             $data->description = $request->input('description');
             $data->status = $request->input('status');
 
-            // $data->crated_at = Auth::user()->id; // Store the ID of the user who updated the review
+            // $data->crated_at = Auth::user()->id; // Store the ID of the user who updated the planpackage
             $data->save();
 
-            return redirect()->action([self::class, 'index'])->with('t-success', 'Review updated successfully.');
+            return redirect()->action([self::class, 'index'])->with('t-success', 'Plan Package updated successfully.');
         } catch (\Exception $e) {
             // dd($e->getMessage());
 
-            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the Review.');
+            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the planpackage.');
         }
     }
 
     public function destroy(string $id)
     {
-        $data = Review::find($id);
+        $data = PlanPackage::find($id);
 
         if (!$data) {
             return response()->json(['t-success' => false, 'message' => 'Data not found.']);
@@ -161,7 +163,7 @@ class ReviewController extends Controller
 
     public function status($id)
     {
-        $data = Review::where('id', $id)->first();
+        $data = PlanPackage::where('id', $id)->first();
         if ($data->status == 'active') {
             // If the current status is active, change it to inactive
             $data->status = 'inactive';
@@ -186,6 +188,4 @@ class ReviewController extends Controller
             ]);
         }
     }
-
-
 }
