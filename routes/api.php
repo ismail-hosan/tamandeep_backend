@@ -41,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/logout', 'logout');
         Route::delete('/delete-account', 'deleteAccount');
         // Route::post('/profile/update/user/{id}', 'ProfileUpdate');
-        Route::post('/profile/update/user/{id}', 'ProfileUpdate');
+        Route::post('/profile/update/user', 'ProfileUpdate');
     });
 
     Route::controller(ActionController::class)->group(function () {
@@ -52,5 +52,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    
+
 });

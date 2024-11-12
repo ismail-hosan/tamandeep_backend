@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\User;
 use App\Models\C_M_S;
+use App\Helper\ImageHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -145,35 +146,7 @@ class AuthController extends Controller
         ]);
     }
 
-    /*  public function ProfileUpdate(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'first_name' => 'required',
-                'last_name' => 'required',
-                'email' => 'required'
-            ]);
-            $user = User::find($id);
-            $user->first_name = $request->first_name;
-            $user->last_name = $request->last_name;
-            $user->email = $request->email;
-            $user->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Profile updated successfully',
-                'user' => $user
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Profile update failed',
-                'error' => $th->getMessage()
-            ], 400);
-        }
-    } */
-
-    public function ProfileUpdate(Request $request, $id)
+    /* public function ProfileUpdate(Request $request, $id)
     {
         try {
             // Get the currently authenticated user
@@ -214,6 +187,58 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Profile updated successfully',
                 'user' => $user
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Profile update failed',
+                'error' => $th->getMessage()
+            ], 400);
+        }
+    } */
+
+    public function ProfileUpdate(Request $request)
+    {
+        try {
+            // Get the currently authenticated user
+            $authenticatedUser = Auth::user();
+
+            // Update the user's profile information
+            $authenticatedUser->first_name = $request->first_name;
+            $authenticatedUser->last_name = $request->last_name;
+            $authenticatedUser->email = $request->email;
+
+            // Update password if provided
+            if ($request->has('password')) {
+                $authenticatedUser->password = Hash::make($request->password);
+            }
+
+            // Handle image upload if there's a new image
+            if ($request->hasFile('image')) {
+                
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $imagePath = public_path('/profile/image/');
+
+                // Move the image to the public storage folder
+                $image->move($imagePath, $imageName);
+                $authenticatedUser->image = '/profile/image/' . $imageName;
+            }
+
+
+            // Update occupation if provided
+            if ($request->has('occupation')) {
+                $authenticatedUser->occupation = $request->occupation;
+            }
+
+            // Save the updated user data
+            $authenticatedUser->save();
+            url('public/',$data->image)
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'user' => $authenticatedUser
             ]);
         } catch (\Throwable $th) {
             return response()->json([
