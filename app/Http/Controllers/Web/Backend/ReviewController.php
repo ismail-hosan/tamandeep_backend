@@ -40,7 +40,7 @@ class ReviewController extends Controller
                 ->addColumn('status', function ($data) {
                     $status = ' <div class="form-check form-switch" style="margin-left:40px;">';
                     $status .= ' <input onclick="showStatusChangeAlert(' . $data->id . ')" type="checkbox" class="form-check-input" id="customSwitch' . $data->id . '" getAreaid="' . $data->id . '" name="status"';
-                    if ($data->status == "active") {
+                    if ($data->status == "Active") {
                         $status .= "checked";
                     }
                     $status .= '><label for="customSwitch' . $data->id . '" class="form-check-label" for="customSwitch"></label></div>';
@@ -186,7 +186,6 @@ class ReviewController extends Controller
             ]);
         }
     }
-
 
 
 }

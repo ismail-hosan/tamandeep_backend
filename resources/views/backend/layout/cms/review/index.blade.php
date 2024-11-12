@@ -116,8 +116,8 @@
                         {
                             data: 'status',
                             name: 'status',
-                            orderable: false,
-                            searchable: false
+                            orderable: true,
+                            searchable: true
                         },
                         {
                             data: 'action',
@@ -133,7 +133,6 @@
                 });
             }
         });
-
 
 
         // delete Confirm
@@ -153,6 +152,7 @@
                 }
             });
         };
+
         // Delete Button
         function deleteItem(id) {
             var url = '{{ route('review.delete', ':id') }}';
@@ -184,8 +184,8 @@
         }
 
 
-        // Status Change Confirm Alert
-        function showStatusChangeAlert(id) {
+         // Status Change Confirm Alert
+         function showStatusChangeAlert(id) {
             event.preventDefault();
 
             Swal.fire({
@@ -204,7 +204,7 @@
 
         // Status Change
         function statusChange(id) {
-            var url = '';
+            var url = '{{ route('review.status', ':id') }}';
             $.ajax({
                 type: "GET",
                 url: url.replace(':id', id),
