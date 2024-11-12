@@ -27,7 +27,9 @@ use App\Http\Controllers\Web\Backend\SystemSettingController;
 Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('/login', 'login');
-    Route::post('/profile/update/user/{id}', 'ProfileUpdate');
+    // Route::post('/profile/update/user/{id}', 'ProfileUpdate');
+    Route::middleware('auth:sanctum')->post('/profile/update/user/{id}', 'ProfileUpdate');
+
 });
 
 // Cms Route
