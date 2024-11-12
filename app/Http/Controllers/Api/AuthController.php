@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Models\C_M_S;
 use App\Models\User;
+use App\Models\C_M_S;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -19,7 +20,7 @@ class AuthController extends Controller
     //         'type' => 'land_second',
     //         'first_desc' => json_encode($request->all()), // Encode all request data into JSON for the 'index' field
     //     ]);
-    
+
     //     return response()->json(['message' => 'Data saved successfully', 'data' => $cms]);
     // }
     //register functions
@@ -100,7 +101,7 @@ class AuthController extends Controller
     public function check(Request $request)
     {
         $user = $request->user();
-    
+
         if ($user) {
             return response()->json([
                 'status' => 'success',
@@ -119,7 +120,7 @@ class AuthController extends Controller
     {
         // Revoke the token that was used to authenticate the current request
         $request->user()->currentAccessToken()->delete();
-    
+
         return response()->json([
             'status' => 'success',
             'message' => 'Logged out successfully'
@@ -142,5 +143,33 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Account deleted successfully'
         ]);
+    }
+
+    public function ProfileUpdate(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'first_name' => 'required',
+                'last_name' => 'required',
+                'email' => 'required'
+            ]);
+            $user = User::find($id);
+            $user->first_name = $request->first_name;
+            $user->last_name = $request->last_name;
+            $user->email = $request->email;
+            $user->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Profile updated successfully',
+                'user' => $user
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Profile update failed',
+                'error' => $th->getMessage()
+            ], 400);
+        }
     }
 }
