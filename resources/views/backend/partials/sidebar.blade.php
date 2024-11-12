@@ -83,6 +83,13 @@
                     <a class="menu-link" href="{{route('review.index')}}">Reviews</a>
                 </li>
             </ul>
+
+            {{-- Brand Logo --}}
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a class="menu-link" href="{{route('brandlogo.index')}}">Brand Logos</a>
+                </li>
+            </ul>
         </li>
 
 
