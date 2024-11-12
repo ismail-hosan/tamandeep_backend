@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Web\Backend;
 
-use App\Http\Controllers\Controller;
-use App\Models\SystemSetting;
+use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\SystemSetting;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 class SystemSettingController extends Controller
@@ -159,11 +160,13 @@ class SystemSettingController extends Controller
     public function profileupdate(Request $request)
     {
         $request->validate([
-            'name'=>'required',
+            'first_name'=>'required',
+            'last_name'=>'required',
             'email'=>'required'
         ]);
         $user = User::find(Auth::user()->id);
-        $user->name = $request->name;
+        $user->first_name = $request->first_name;
+        $user->last_name = $request->last_name;
         $user->email = $request->email;
         $user->save();
 

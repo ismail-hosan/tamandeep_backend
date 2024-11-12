@@ -16,11 +16,24 @@
                                 @csrf
                                 <div class="form-group row mb-3">
                                     <div class="col-12">
-                                        <label class="form-lable">Name:</label>
+                                        <label class="form-lable">First Name:</label>
                                         <input type="text"
-                                            class="form-control form-control-md border-left-0 @error('name') is-invalid @enderror"
-                                            placeholder="Name" name="name" value="{{ Auth::user()->name }}">
-                                        @error('name')
+                                            class="form-control form-control-md border-left-0 @error('first_name') is-invalid @enderror"
+                                            placeholder="first_name" name="first_name" value="{{ Auth::user()->first_name }}">
+                                        @error('first_name')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-3">
+                                    <div class="col-12">
+                                        <label class="form-lable">Last Name:</label>
+                                        <input type="text"
+                                            class="form-control form-control-md border-left-0 @error('last_name') is-invalid @enderror"
+                                            placeholder="last_name" name="last_name" value="{{ Auth::user()->last_name }}">
+                                        @error('last_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
