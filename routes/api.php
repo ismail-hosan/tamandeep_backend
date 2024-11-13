@@ -40,7 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/check', 'check');
         Route::get('/logout', 'logout');
         Route::delete('/delete-account', 'deleteAccount');
-        // Route::post('/profile/update/user/{id}', 'ProfileUpdate');
         Route::post('/profile/update/user', 'ProfileUpdate');
     });
 

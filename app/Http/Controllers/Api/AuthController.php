@@ -146,57 +146,6 @@ class AuthController extends Controller
         ]);
     }
 
-    /* public function ProfileUpdate(Request $request, $id)
-    {
-        try {
-            // Get the currently authenticated user
-            $authenticatedUser = Auth::user();
-
-            // Check if the authenticated user is trying to update their own profile
-            if ($authenticatedUser->id !== (int) $id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'You can only update your own profile'
-                ], 403);  // Forbidden
-            }
-
-            // Validate incoming data
-            $request->validate([
-                'first_name' => 'required',
-                'last_name' => 'required',
-                'email' => 'required|email|unique:users,email,' . $id
-            ]);
-
-            // Find the user to update
-            $user = User::find($id);
-
-            if (!$user) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User not found'
-                ], 404);  // Not Found
-            }
-
-            // Update user details
-            $user->first_name = $request->first_name;
-            $user->last_name = $request->last_name;
-            $user->email = $request->email;
-            $user->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Profile updated successfully',
-                'user' => $user
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Profile update failed',
-                'error' => $th->getMessage()
-            ], 400);
-        }
-    } */
-
     public function ProfileUpdate(Request $request)
     {
         try {
