@@ -73,7 +73,7 @@ Route::middleware(['auth','verified'])->group(function () {
 
     });
 
-    Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');
+    
 });
 
 require __DIR__.'/auth.php';

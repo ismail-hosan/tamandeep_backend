@@ -70,7 +70,6 @@ class ActionController extends Controller
                     'qr_code_entry' => $existingQrCode
                 ]);
             }
-    
             $encryptedUserId = Crypt::encryptString($userId); 
     
             // Generate the QR code URL with the encrypted user ID
@@ -88,7 +87,6 @@ class ActionController extends Controller
                 'user_id' => $userId,
                 'file_path' => 'qrcodes/' . $qrCodeFileName,
             ]);
-    
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -144,4 +142,6 @@ class ActionController extends Controller
             'data' => $responseData
         ]);
     }
+
+    
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CMSController;
+use App\Http\Controllers\Api\QrcodeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,3 +40,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/product/store',[ActionController::class, 'store']);
     Route::get('/product/show',[ActionController::class, 'show']);
 });
+
+Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');

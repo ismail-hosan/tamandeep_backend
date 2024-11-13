@@ -24,26 +24,19 @@ class CMSController extends Controller
     {
         $data = C_M_S::where('type', 'banner')->first();
     
-        // Adjust validation rules based on whether we're updating or creating
         $request->validate([
             'title' => 'required|string',
             'hilight_title' => 'required|string',
             'image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
             'description' => 'required|string',
         ]);
-
-        // dd($request->all());
-        $firstImagePath = $data->image ?? null;
+    
+        // Initialize `$firstImagePath` only if `$data` exists, otherwise set to null
+        $firstImagePath = $data ? $data->image : null;
     
         try {
-            // Handle new image upload
             if ($request->hasFile('image')) {
-              
-                $firstImagePath = ImageHelper::handleImageUpload($request->file('image'), $data->image, '/cms/banner');
-       
-            } else {
-                // Retain old image path if no new image is uploaded
-                $imagePath = $data->image ?? null;
+                $firstImagePath = ImageHelper::handleImageUpload($request->file('image'), $firstImagePath, '/cms/banner');
             }
     
             // Update or create CMS entry
@@ -59,152 +52,128 @@ class CMSController extends Controller
                 ]
             );
     
-            // Redirect with success or error message
-            if ($data->wasRecentlyCreated || $data->wasChanged()) {
-                return redirect()->back()->with('t-success', 'Data Updated Successfully');
-            } else {
-                return redirect()->back()->with('t-error', 'Data update failed!');
-            }
+            return redirect()->back()->with('t-success', 'Data Updated Successfully');
     
         } catch (\Throwable $th) {
             dd($th->getMessage());
+            return redirect()->back()->with('t-error', 'Data update failed!');
         }
     }
-
     public function second_section(Request $request)
-    {
-        
-        $data = C_M_S::where('type', 'land_first')->first();
+{
+    $data = C_M_S::where('type', 'land_first')->first();
 
-        // Adjust validation rules based on whether we're updating or creating
-        $request->validate([
-            'f_title' => 'required|string',
-            'f_hilight_title' => 'required|string',
-            'f_image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
-            'f_description' => 'required|string',
-            'f_first_title' => 'required|string',
-            'f_first_desc' => 'required|string',
-            'f_second_title' => 'required|string',
-            'f_second_desc' => 'required|string',
-            'f_third_title' => 'required|string',
-            'f_third_desc' => 'required|string',
-        ]);
-        // dd($request->all());
+    $request->validate([
+        'f_title' => 'required|string',
+        'f_hilight_title' => 'required|string',
+        'f_image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
+        'f_description' => 'required|string',
+        'f_first_title' => 'required|string',
+        'f_first_desc' => 'required|string',
+        'f_second_title' => 'required|string',
+        'f_second_desc' => 'required|string',
+        'f_third_title' => 'required|string',
+        'f_third_desc' => 'required|string',
+    ]);
 
-        try {
-            // Handle new image upload
-            if ($request->hasFile('f_image')) {
-                // Delete old image if updating and a new image is uploaded
-                if ($data && $data->image && file_exists(public_path($data->image))) {
-                    unlink(public_path($data->image));
-                }
+    // Initialize `$firstImagePath` with existing image path or null
+    $firstImagePath = $data ? $data->f_image : null;
 
-                // Store the new image
-                $image = $request->file('f_image');
-                $imageName = time() . '_' . $image->getClientOriginalName();
-                $imagePath = '/cms/section/' . $imageName;
-                $image->move(public_path('/cms/section/'), $imageName);
-            } else {
-                // Retain old image path if no new image is uploaded
-                $imagePath = $data->image ?? null;
-            }
-
-            // Update or create CMS entry
-            $data = C_M_S::updateOrCreate(
-                [
-                    'type' => 'land_first',
-                ],
-                [
-                    'title' => $request->f_title,
-                    'hilight_title' => $request->f_hilight_title,
-                    'image' => $imagePath,
-                    'descriptions' => $request->f_description,
-                    'first_title' => $request->f_first_title,
-                    'first_desc' => $request->f_first_desc,
-                    'second_title' => $request->f_second_title,
-                    'second_desc' => $request->f_second_desc,
-                    'third_title' => $request->f_third_title,
-                    'third_desc' => $request->f_third_desc,
-                ]
-            );
-
-            // Redirect with success or error message
-            if ($data->wasRecentlyCreated || $data->wasChanged()) {
-                return redirect()->back()->with('t-success', 'Data Updated Successfully');
-            } else {
-                return redirect()->back()->with('t-error', 'Data update failed!');
-            }
-
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('t-error', 'Error: ' . $th->getMessage());
+    try {
+        // Handle new image upload
+        if ($request->hasFile('f_image')) {
+            $firstImagePath = ImageHelper::handleImageUpload($request->file('f_image'), $firstImagePath, '/cms/section');
         }
-    }
 
-    public function third_section(Request $request)
-    {
-     
-        
-        $data = C_M_S::where('type', 'land_second')->first();
+        // Update or create CMS entry
+        $data = C_M_S::updateOrCreate(
+            [
+                'type' => 'land_first',
+            ],
+            [
+                'title' => $request->f_title,
+                'hilight_title' => $request->f_hilight_title,
+                'image' => $firstImagePath, // Use `$firstImagePath` consistently
+                'descriptions' => $request->f_description,
+                'first_title' => $request->f_first_title,
+                'first_desc' => $request->f_first_desc,
+                'second_title' => $request->f_second_title,
+                'second_desc' => $request->f_second_desc,
+                'third_title' => $request->f_third_title,
+                'third_desc' => $request->f_third_desc,
+            ]
+        );
 
-        // Adjust validation rules based on whether we're updating or creating
-        $request->validate([
-            's_title' => 'required|string',
-            's_hilight_title' => 'required|string',
-            's_image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
-            's_description' => 'required|string',
-            's_first_title' => 'required|string',
-            's_first_desc' => 'required|string',
-            's_second_title' => 'required|string',
-            's_second_desc' => 'required|string',
-            's_third_title' => 'required|string',
-            's_third_desc' => 'required|string',
-        ]);
-        // dd($request->all());
-        $imagePath = $data->image ?? null;
-
-        try {
-            // Handle new image upload
-            if ($request->hasFile('s_image')) {
-                // Handle the upload for the first image
-            $imagePath = ImageHelper::handleImageUpload($request->file('s_image'), $data->image, '/cms/section');
-        
-            } else {
-                // Retain old image path if no new image is uploaded
-                $imagePath = $data->image ?? null;
-            }
-
-            // Update or create CMS entry
-            $data = C_M_S::updateOrCreate(
-                [
-                    'type' => 'land_second',
-                ],
-                [
-                    'title' => $request->s_title,
-                    'hilight_title' => $request->s_hilight_title,
-                    'image' => $imagePath,
-                    'descriptions' => $request->s_description,
-                    'first_title' => $request->s_first_title,
-                    'first_desc' => $request->s_first_desc,
-                    'second_title' => $request->s_second_title,
-                    'second_desc' => $request->s_second_desc,
-                    'third_title' => $request->s_third_title,
-                    'third_desc' => $request->s_third_desc,
-                ]
-            );
-
-            // Redirect with success or error message
-            if ($data->wasRecentlyCreated || $data->wasChanged()) {
-                return redirect()->back()->with('t-success', 'Data Updated Successfully');
-            } else {
-                return redirect()->back()->with('t-error', 'Data update failed!');
-            }
-
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('t-error', 'Error: ' . $th->getMessage());
+        // Redirect with success or error message
+        if ($data->wasRecentlyCreated || $data->wasChanged()) {
+            return redirect()->back()->with('t-success', 'Data Updated Successfully');
+        } else {
+            return redirect()->back()->with('t-error', 'Data update failed!');
         }
-    }
 
-    public function four_section(Request $request)
+    } catch (\Throwable $th) {
+        return redirect()->back()->with('t-error', 'Error: ' . $th->getMessage());
+    }
+}
+
+public function third_section(Request $request)
+{
+    $data = C_M_S::where('type', 'land_second')->first();
+
+    $request->validate([
+        's_title' => 'required|string',
+        's_hilight_title' => 'required|string',
+        's_image' => $data ? 'nullable|image|mimes:png|max:2048' : 'required|image|mimes:png|max:2048',
+        's_description' => 'required|string',
+        's_first_title' => 'required|string',
+        's_first_desc' => 'required|string',
+        's_second_title' => 'required|string',
+        's_second_desc' => 'required|string',
+        's_third_title' => 'required|string',
+        's_third_desc' => 'required|string',
+    ]);
+
+    // Initialize `$imagePath` with existing image path or null
+    $imagePath = $data ? $data->image : null;
+
+    try {
+        // Handle new image upload
+        if ($request->hasFile('s_image')) {
+            $imagePath = ImageHelper::handleImageUpload($request->file('s_image'), $imagePath, '/cms/section');
+        }
+
+        // Update or create CMS entry
+        $data = C_M_S::updateOrCreate(
+            [
+                'type' => 'land_second',
+            ],
+            [
+                'title' => $request->s_title,
+                'hilight_title' => $request->s_hilight_title,
+                'image' => $imagePath,
+                'descriptions' => $request->s_description,
+                'first_title' => $request->s_first_title,
+                'first_desc' => $request->s_first_desc,
+                'second_title' => $request->s_second_title,
+                'second_desc' => $request->s_second_desc,
+                'third_title' => $request->s_third_title,
+                'third_desc' => $request->s_third_desc,
+            ]
+        );
+
+        // Redirect with success or error message
+        if ($data->wasRecentlyCreated || $data->wasChanged()) {
+            return redirect()->back()->with('t-success', 'Data Updated Successfully');
+        } else {
+            return redirect()->back()->with('t-error', 'Data update failed!');
+        }
+
+    } catch (\Throwable $th) {
+        return redirect()->back()->with('t-error', 'Error: ' . $th->getMessage());
+    }
+}
+
+public function four_section(Request $request)
 {
     // Retrieve the existing data if available
     $data = C_M_S::where('type', 'work')->first();
@@ -225,27 +194,25 @@ class CMSController extends Controller
     ]);
 
     try {
-        // Initialize paths for images
+        // Initialize paths for images from existing data if available
         $firstImagePath = $data->first_image ?? null;
         $secondImagePath = $data->second_image ?? null;
         $thirdImagePath = $data->third_image ?? null;
 
-        // Handle the upload for the first image
+        // Handle the upload for each image if present in the request
         if ($request->hasFile('t_first_image')) {
-            $firstImagePath = ImageHelper::handleImageUpload($request->file('t_first_image'), $data->first_image, '/cms/section');
+            $firstImagePath = ImageHelper::handleImageUpload($request->file('t_first_image'), $firstImagePath, '/cms/section');
         }
 
-        // Handle the upload for the second image
         if ($request->hasFile('t_second_image')) {
-            $secondImagePath = ImageHelper::handleImageUpload($request->file('t_second_image'), $data->second_image, '/cms/section');
+            $secondImagePath = ImageHelper::handleImageUpload($request->file('t_second_image'), $secondImagePath, '/cms/section');
         }
 
-        // Handle the upload for the third image
         if ($request->hasFile('t_third_image')) {
-            $thirdImagePath = ImageHelper::handleImageUpload($request->file('t_third_image'), $data->third_image, '/cms/section');
+            $thirdImagePath = ImageHelper::handleImageUpload($request->file('t_third_image'), $thirdImagePath, '/cms/section');
         }
 
-        // Update or create CMS entry
+        // Update or create CMS entry with updated image paths
         $data = C_M_S::updateOrCreate(
             [
                 'type' => 'work',
@@ -318,9 +285,7 @@ class CMSController extends Controller
         $request->validate([
             'footer_description'=>'required|string',
         ]);
-
-        try {
-           
+        try { 
             // Update or create CMS entry
             $data = C_M_S::updateOrCreate(
                 [
