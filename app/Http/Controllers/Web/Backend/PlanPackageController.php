@@ -71,7 +71,7 @@ class PlanPackageController extends Controller
             'title' => 'required|max:255',
             'price' => 'required|numeric|min:0.01',
             'description' => 'required',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         try {
@@ -123,7 +123,7 @@ class PlanPackageController extends Controller
             'title' => 'required|max:255',
             'price' => 'required|numeric|min:0.01',
             'description' => 'required',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         try {

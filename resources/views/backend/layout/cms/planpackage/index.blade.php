@@ -25,7 +25,6 @@
                                         <th>#</th>
                                         <th>Title</th>
                                         <th>Price</th>
-                                        <th>Description</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -104,12 +103,6 @@
                         {
                             data: 'price',
                             name: 'price',
-                            orderable: true,
-                            searchable: true
-                        },
-                        {
-                            data: 'description',
-                            name: 'description',
                             orderable: true,
                             searchable: true
                         },

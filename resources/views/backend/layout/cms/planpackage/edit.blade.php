@@ -22,27 +22,19 @@
                                 enctype="multipart/form-data">
                                 @csrf
 
-                                <!-- User Selection Dropdown -->
-                                <div class="form-group mb-3">
-                                    <label class="form-label required">User:</label>
-                                    <select name="user_id" class="form-control @error('user_id') is-invalid @enderror">
-                                        <option value="">Select a user</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}" {{ $data->user_id == $user->id ? 'selected' : '' }}>
-                                                {{ $user->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('user_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
                                 <div class="form-group mb-3">
                                     <label class="form-lable required">Title:</label>
                                     <input type="text" class="form-control @error('title') is-invalid @enderror"
                                         id="title" name="title" value="{{ $data->title ??'' }}">
                                     @error('title')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label class="form-label required">Price:</label>
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}" required>
+                                    @error('price')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
