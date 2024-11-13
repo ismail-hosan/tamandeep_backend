@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Web\Backend;
 
 use App\Helper\ImageHelper;
 use App\Http\Controllers\Controller;
-use App\Models\Features;
+use App\Models\Brandlogo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\DataTables;
 
-class FeaturesController extends Controller
+class BrandlogoController extends Controller
 {
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Features::latest();
+            $data = Brandlogo::latest();
             return DataTables::of($data)
                 ->addIndexColumn()
                 ->addColumn('image', function ($data) {
@@ -29,7 +29,7 @@ class FeaturesController extends Controller
                 ->addColumn('action', function ($data) {
 
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                                  <a href="' . route('features.edit',  $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
+                                  <a href="' . route('brandlogo.edit',  $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
                                   <i class="bi bi-pencil"></i>
                                   </a>
                                   <a href="#" onclick="showDeleteConfirm(' . $data->id . ')" type="button" class="btn btn-danger text-white" title="Delete">
@@ -51,120 +51,108 @@ class FeaturesController extends Controller
                 ->make(true);
         }
 
-        return view('backend.layout.cms.features.index');
+        return view('backend.layout.cms.brandlogo.index');
     }
 
     public function create()
     {
-        return view('backend.layout.cms.features.create');
+        return view('backend.layout.cms.brandlogo.create');
     }
 
     public function store(Request $request)
     {
         // Validation rules
         $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => 'required|in:active,inactive',
         ]);
 
 
         try {
             // Handle image upload if there is a new image
             if ($request->hasFile('image')) {
-                $imagePath = ImageHelper::handleImageUpload($request->file('image'), null, '/cms/featurs/section');
+                $imagePath = ImageHelper::handleImageUpload($request->file('image'), null, '/cms/brandlogo/section');
             } else {
                 $imagePath = null;
             }
 
-            $data = new Features();
-            $data->title = $request->input('title');
-            $data->description = $request->input('description');
+            $data = new Brandlogo();
             $data->image = $imagePath;
-            $data->crated_at = Auth::user()->id;
+            $data->status = $request->input('status');
+            // $data->crated_at = Auth::user()->id;
             $data->save();
-            // Check if the category was created successfully
+
             if ($data) {
-                return redirect()->action([self::class, 'index'])->with('t-success', 'Category created successfully.');
+                return redirect()->action([self::class, 'index'])->with('t-success', 'BrandLogo created successfully.');
             } else {
-                return redirect()->action([self::class, 'index'])->with('t-error', 'Category creation failed.');
+                return redirect()->action([self::class, 'index'])->with('t-error', 'BrandLogo creation failed.');
             }
         } catch (\Exception $e) {
-            \Log::error("Category creation failed: " . $e->getMessage());
-            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while creating the category.');
+            dd($e ->getMessage());
+            // \Log::error("BrandLogo creation failed: " . $e->getMessage());
+            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while creating the BrandLogo.');
         }
     }
 
     public function edit(string $id)
     {
-        $data = Features::find($id);
-        return view('backend.layout.cms.features.edit', get_defined_vars());
+        $data = Brandlogo::find($id);
+        return view('backend.layout.cms.brandlogo.edit', get_defined_vars());
     }
 
     public function update(Request $request, $id)
     {
         // Validation rules
         $request->validate([
-            'title' => 'required|max:255',
-            'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Image validation
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'status' => 'required|in:active,inactive',
         ]);
 
         try {
-            // Find the existing feature by ID
-            $data = Features::findOrFail($id);
+            $data = Brandlogo::findOrFail($id);
 
             // Handle image upload if there is a new image
             if ($request->hasFile('image')) {
-                $imagePath = ImageHelper::handleImageUpload($request->file('image'), $data->image, '/cms/features/section');
+                $imagePath = ImageHelper::handleImageUpload($request->file('image'), $data->image, '/cms/brandlogo/section');
             } else {
                 $imagePath = $data->image;
             }
 
-            // Update the feature with the new data
-            $data->title = $request->input('title');
-            $data->description = $request->input('description');
             $data->image = $imagePath;
-            $data->crated_at = Auth::user()->id; // Store the ID of the user who updated the feature
+            $data->status = $request->input('status');
+            // $data->crated_at = Auth::user()->id;
             $data->save();
 
-            // Return success message upon successful update
-            return redirect()->action([self::class, 'index'])->with('t-success', 'Feature updated successfully.');
+            return redirect()->action([self::class, 'index'])->with('t-success', 'BrandLogo updated successfully.');
         } catch (\Exception $e) {
-            // Log error message if something goes wrong
-            \Log::error("Feature update failed: " . $e->getMessage());
+            dd($e ->getMessage());
+            // \Log::error("BrandLogo update failed: " . $e->getMessage());
 
             // Return error message on failure
-            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the feature.');
+            return redirect()->action([self::class, 'index'])->with('t-error', 'An error occurred while updating the BrandLogo.');
         }
     }
 
     public function destroy(string $id)
     {
-        // Find the feature by ID
-        $data = Features::find($id);
+        $data = Brandlogo::find($id);
 
-        // Check if the feature exists
         if (!$data) {
             return response()->json(['t-success' => false, 'message' => 'Data not found.']);
         }
 
-        // Check if there is an associated image and delete it
         if ($data->image && file_exists(public_path($data->image))) {
-            // Unlink the image file from storage
             unlink(public_path($data->image));
         }
 
-        // Delete the feature record from the database
         $data->delete();
 
-        // Return a success response
         return response()->json(['t-success' => true, 'message' => 'Deleted successfully.']);
     }
 
     public function status($id)
     {
-        $data = Features::where('id', $id)->first();
+        $data = Brandlogo::where('id', $id)->first();
         if ($data->status == 'active') {
             // If the current status is active, change it to inactive
             $data->status = 'inactive';

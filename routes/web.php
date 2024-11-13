@@ -50,7 +50,7 @@ Route::middleware(['auth','verified'])->group(function () {
         //  Route::post('/pro', 'paypalstore')->name('paypal.store');
     });
     Route::prefix('admin')->controller(CMSController::class)->group(function () {
-        Route::get('/cms', 'index')->name('cms.index'); 
+        Route::get('/cms', 'index')->name('cms.index');
         Route::post('/banner', 'banner')->name('cms.banner');
         Route::post('/firstSections', 'second_section')->name('cms.second_section');
         Route::post('/thirdSections', 'third_section')->name('cms.third_section');
@@ -63,7 +63,7 @@ Route::middleware(['auth','verified'])->group(function () {
 
     //-------- features---------//
     Route::prefix('features')->controller(FeaturesController::class)->group(function () {
-        Route::get('/', 'index')->name('features.index'); 
+        Route::get('/', 'index')->name('features.index');
         Route::get('/create', 'create')->name('features.create');
         Route::post('/store', 'store')->name('features.store');
         Route::get('/edit/{id}', 'edit')->name('features.edit');
@@ -77,3 +77,4 @@ Route::middleware(['auth','verified'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+// require __DIR__.'/backend_masum.php';

@@ -1,6 +1,6 @@
 @extends('backend.app')
 
-@section('title', 'Features')
+@section('title', 'Plan Packages')
 
 @push('style')
     <style>
@@ -15,17 +15,17 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Features</h4>
-                        <div style="display: flex;justify-content: end;"><a
-                                href="{{route('features.create')}}" class="btn btn-primary">Add Features</a></div>
+                        <h4 class="card-title">Plan Packages</h4>
+                        <div style="display: flex;justify-content: end;"><a href="{{ route('planpackage.create') }}"
+                                class="btn btn-primary">Add Plan Packages</a></div>
                         <div class="table-responsive mt-4 p-4">
                             <table class="table table-hover" id="data-table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
                                         <th>Title</th>
-                                        <th>Description</th>
-                                        <th>Image</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -84,7 +84,7 @@
                     pagingType: "full_numbers",
                     dom: "<'row justify-content-between table-topbar'<'col-md-2 col-sm-4 px-0'l><'col-md-2 col-sm-4 px-0'f>>tipr",
                     ajax: {
-                        url: "{{route('features.index')}}",
+                        url: "{{ route('planpackage.index') }}",
                         type: "get",
                     },
 
@@ -101,22 +101,16 @@
                             searchable: true
                         },
                         {
-                            data: 'description',
-                            name: 'description',
+                            data: 'price',
+                            name: 'price',
                             orderable: true,
                             searchable: true
                         },
                         {
-                            data: 'image',
-                            name: 'image',
-                            orderable: false,
-                            searchable: false
-                        },
-                        {
                             data: 'status',
                             name: 'status',
-                            orderable: false,
-                            searchable: false
+                            orderable: true,
+                            searchable: true
                         },
                         {
                             data: 'action',
@@ -132,7 +126,6 @@
                 });
             }
         });
-
 
 
         // delete Confirm
@@ -152,9 +145,10 @@
                 }
             });
         };
+
         // Delete Button
         function deleteItem(id) {
-            var url = '{{ route('features.delete', ':id') }}';
+            var url = '{{ route('planpackage.delete', ':id') }}';
             var csrfToken = '{{ csrf_token() }}';
             $.ajax({
                 type: "DELETE",
@@ -183,8 +177,8 @@
         }
 
 
-        // Status Change Confirm Alert
-        function showStatusChangeAlert(id) {
+         // Status Change Confirm Alert
+         function showStatusChangeAlert(id) {
             event.preventDefault();
 
             Swal.fire({
@@ -203,7 +197,7 @@
 
         // Status Change
         function statusChange(id) {
-            var url = '{{ route('features.status', ':id') }}';
+            var url = '{{ route('planpackage.status', ':id') }}';
             $.ajax({
                 type: "GET",
                 url: url.replace(':id', id),
@@ -225,6 +219,7 @@
                 } // Erro
             });
         }
+
 
     </script>
 @endpush
