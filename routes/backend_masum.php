@@ -36,7 +36,7 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/create', 'create')->name('planpackage.create');
         Route::post('/store', 'store')->name('planpackage.store');
         Route::get('/edit/{id}', 'edit')->name('planpackage.edit');
-        Route::post('/update/{id}', 'update')->name('planpackage.update');
+        Route::put('/update/{id}', 'update')->name('planpackage.update');
         Route::delete('/delete/{id}', 'destroy')->name('planpackage.delete');
         Route::get('/status/{id}',  'status')->name('planpackage.status');
     });

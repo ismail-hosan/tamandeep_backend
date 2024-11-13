@@ -1,6 +1,6 @@
 @extends('backend.app')
 
-@section('title', 'Edit Plan Packages')
+@section('title', 'Edit Plan Package')
 
 @push('style')
     <style>
@@ -16,16 +16,15 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">Edit Plan Packages</h4>
+                        <h4 class="card-title">Edit Plan Package</h4>
                         <div class="mt-4">
-                            <form class="forms-sample"action="{{ route('planpackage.update',$data->id) }}" method="POST"
-                                enctype="multipart/form-data">
+                            <form class="forms-sample" action="{{ route('planpackage.update', $data->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+                                @method('PUT')
 
                                 <div class="form-group mb-3">
                                     <label class="form-lable required">Title:</label>
-                                    <input type="text" class="form-control @error('title') is-invalid @enderror"
-                                        id="title" name="title" value="{{ $data->title ??'' }}">
+                                    <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" value="{{ old('title', $data->title) }}">
                                     @error('title')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -33,26 +32,29 @@
 
                                 <div class="form-group mb-3">
                                     <label class="form-label required">Price:</label>
-                                    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price') }}" required>
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $data->price) }}" required>
                                     @error('price')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="form-group mb-3">
-                                    <label class="form-label required">Description:</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description">{{ $data->description }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                <div class="form-group row mb-3">
+                                    <div class="col">
+                                        <label class="form-lable">Description</label>
+                                        <textarea class="form-control @error('description') is-invalid @enderror" name="description" id="description">{{ old('description', $data->description) }}</textarea>
+                                        @error('description')
+                                            <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                            </span>
+                                        @enderror
+                                    </div>
                                 </div>
 
                                 <div class="form-group mb-3">
                                     <label class="required">Status:</label>
                                     <select name="status" class="form-control @error('status') is-invalid @enderror select2" required>
-                                        @php($status = old('status', isset($data) ? $data->status : ''))
                                         @foreach (['Active', 'Inactive'] as $sts)
-                                            <option value="{{ $sts }}" {{ $status == $sts ? 'selected' : '' }}>{{ $sts }}</option>
+                                            <option value="{{ $sts }}" {{ old('status', $data->status) == $sts ? 'selected' : '' }}>{{ $sts }}</option>
                                         @endforeach
                                     </select>
                                     @error('status')
@@ -60,8 +62,8 @@
                                     @enderror
                                 </div>
 
-                                <button type="submit" class="btn btn-primary me-2">Submit</button>
-                                <a href="{{ route('planpackage.index') }}" class="btn btn-danger ">Cancel</a>
+                                <button type="submit" class="btn btn-primary me-2">Update</button>
+                                <a href="{{ route('planpackage.index') }}" class="btn btn-danger">Cancel</a>
                             </form>
                         </div>
                     </div>
@@ -74,14 +76,16 @@
 @push('script')
     <script src="https://cdn.ckeditor.com/ckeditor5/41.2.0/classic/ckeditor.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            ClassicEditor
-                .create(document.querySelector('#content'), {
-                    height: '500px'
-                })
-                .catch(error => {
-                    console.error(error);
-                });
+        ClassicEditor
+            .create(document.querySelector('#description'))
+            .catch(error => {
+                console.error(error);
+            });
+    </script>
+    <script type="text/javascript" src="https://jeremyfagis.github.io/dropify/dist/js/dropify.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.dropify').dropify();
         });
     </script>
 @endpush

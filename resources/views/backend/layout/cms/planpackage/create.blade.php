@@ -41,14 +41,6 @@
                                     @enderror
                                 </div>
 
-                                {{-- <div class="form-group mb-3">
-                                    <label class="form-label required">Description:</label>
-                                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description">{{ old('description') }}</textarea>
-                                    @error('description')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div> --}}
-
                                 <div class="form-group row mb-3">
                                     <div class="col">
                                         <label class="form-lable">Description</label>
