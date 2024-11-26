@@ -171,7 +171,6 @@ class SystemSettingController extends Controller
     }
 
 
-
     public function passwordupdate(Request $request)
     {
         $validated = $request->validate([
@@ -190,6 +189,44 @@ class SystemSettingController extends Controller
 
         // Redirect back with a success message
         return redirect()->back()->with('t-success', 'Password updated successfully!');
+    }
+
+    public function paypalindex()
+    {
+        return view('backend.layout.system_setting.paypal');
+    }
+
+    public function paypalstore(Request $request)
+    {
+
+        $request->validate([
+            'paypal_client_id'    => 'required|string',
+            'paypal_secret' => 'required|string',
+            'paypal_mode' => 'required|string',
+
+        ]);
+        try {
+            $envContent = File::get(base_path('.env'));
+            $lineBreak = "\n";
+            $envContent = preg_replace([
+                '/PAYPAL_CLIENT_ID=(.*)\s/',
+                '/PAYPAL_SECRET=(.*)\s/',
+                '/PAYPAL_MODE=(.*)\s/',
+
+            ], [
+                'PAYPAL_CLIENT_ID=' . $request->paypal_client_id . $lineBreak,
+                'PAYPAL_CLIENT_SECRET=' . $request->paypal_secret . $lineBreak,
+                'PAYPAL_MODE=' . $request->paypal_mode . $lineBreak,
+            ], $envContent);
+
+            if ($envContent !== null) {
+                File::put(base_path('.env'), $envContent);
+            }
+            return redirect()->back()->with('t-success', 'Paypal Setting Update successfully.');
+        } catch (\Throwable $th) {
+            return redirect()->back()->with('t-error', 'Paypal Setting Update Failed');
+        }
+        return redirect()->back();
     }
 
 }

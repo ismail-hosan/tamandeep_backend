@@ -15,7 +15,7 @@
                         <p class="card-description">Setup your Stripe, please <code>provide your valid
                                 data</code>.</p>
                         <div class="mt-4">
-                            <form class="forms-sample" action="{{route('admin.stripe.store')}}" method="POST">
+                            <form class="forms-sample" action="{{route('stripe.store')}}" method="POST">
                                 @csrf
                                 <div class="form-group row mb-3">
                                     <div class="col-12">

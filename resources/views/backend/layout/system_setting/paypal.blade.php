@@ -15,14 +15,14 @@
                         <p class="card-description">Setup your Paypal, please <code>provide your valid
                                 data</code>.</p>
                         <div class="mt-4">
-                            <form class="forms-sample" action="{{route('admin.paypal.store')}}" method="POST">
+                            <form class="forms-sample" action="{{route('paypal.store')}}" method="POST">
                                 @csrf
                                 <div class="form-group row mb-3">
                                     <div class="col-12">
                                         <label>PAYPAL CLIENT ID</label>
                                         <input type="text"
                                             class="form-control form-control-md border-left-0 @error('mail_mailer') is-invalid @enderror"
-                                            placeholder="PAYPAL CLIENT ID" name="paypal_client_id" value="{{ env('PAYPAL_LIVE_CLIENT_ID') }}" required>
+                                            placeholder="PAYPAL CLIENT ID" name="paypal_client_id" value="{{ env('PAYPAL_CLIENT_ID') }}" required>
                                         @error('paypal_client_id')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
@@ -35,7 +35,7 @@
                                         <label>PAYPAL SECRET</label>
                                         <input type="text"
                                             class="form-control form-control-md border-left-0 @error('mail_port') is-invalid @enderror"
-                                            placeholder="PAYPAL SECRET" name="paypal_secret" value="{{ env('PAYPAL_LIVE_CLIENT_SECRET') }}"
+                                            placeholder="PAYPAL SECRET" name="paypal_secret" value="{{ env('PAYPAL_CLIENT_SECRET') }}"
                                             required>
                                         @error('paypal_secret')
                                             <span class="invalid-feedback" role="alert">

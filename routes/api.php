@@ -37,8 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/check', [AuthController::class, 'check']);
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
-    Route::post('/product/store',[ActionController::class, 'store']);
-    Route::get('/product/show',[ActionController::class, 'show']);
+    Route::post('/action/store',[ActionController::class, 'store']);
+    Route::get('/action/show',[ActionController::class, 'show']);
 });
 
 Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');

@@ -12,7 +12,7 @@
                         <p class="card-description">Setup your profile, please <code>provide your valid
                                 data</code>.</p>
                         <div class="mt-4">
-                            <form class="forms-sample" method="POST" action="{{route('profile.update')}}">
+                            <form class="forms-sample" method="POST" action="">
                                 @csrf
                                 <div class="form-group row mb-3">
                                     <div class="col-12">

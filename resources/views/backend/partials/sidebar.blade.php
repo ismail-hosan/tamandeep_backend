@@ -196,10 +196,10 @@
                 {{-- <li class="menu-item {{ Request::routeIs('admin.dynamic_page.*') ? 'active' : '' }}"><a
                         class="menu-link" href="{{ route('admin.dynamic_page.index') }}">Add Dynamic Page</a></li> --}}
 
-                {{-- <li class="menu-item"><a class="menu-link"
-                        href="">Stripe</a></li>
                 <li class="menu-item"><a class="menu-link"
-                            href="">Paypal</a></li> --}}
+                        href="{{route('stripe.index')}}">Stripe</a></li>
+                <li class="menu-item"><a class="menu-link"
+                            href="{{route('paypal.index')}}">Paypal</a></li>
             </ul>
         </li>
 
