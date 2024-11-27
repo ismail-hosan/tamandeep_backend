@@ -7,20 +7,7 @@ use App\Http\Controllers\Api\QrcodeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
 
 
 // Public routes
@@ -30,6 +17,9 @@ Route::post('/login', [AuthController::class, 'login']);
 // Cms Route
 Route::post('/cms', [CMSController::class, 'index']);
 
+Route::post('forget/password',[AuthController::class,'forgetPassword']);
+Route::post('/verify/otp',[AuthController::class,'checkotp']);
+Route::post('/password/update',[AuthController::class,'passwordUpdate']);
 
 
 // Protected routes
@@ -39,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
     Route::post('/action/store',[ActionController::class, 'store']);
     Route::get('/action/show',[ActionController::class, 'show']);
+    
 });
 
 Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');

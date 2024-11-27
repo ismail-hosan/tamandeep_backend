@@ -122,33 +122,6 @@
             </ul>
         </li>
 
-        <!-- Service -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Service</span></li>
-
-        <li class="menu-item">
-            <a href="" class="menu-link">
-                <i class='menu-icon tf-icons bx bxs-badge-check'></i>
-                <div data-i18n="Layouts">Service</div>
-            </a>
-        </li>
-
-        <!-- Contact -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Contact Us</span></li>
-
-        <li class="menu-item">
-            <a href="" class="menu-link">
-                <i class="menu-icon tf-icons bx bxs-message-dots"></i>
-                <div data-i18n="Layouts">Messages</div>
-            </a>
-        </li>
-        <li class="menu-item">
-            <a href="" class="menu-link">
-                <i class="menu-icon tf-icons bx bxs-news"></i>
-                <div data-i18n="Layouts">Newsletters</div>
-            </a>
-        </li>
-
-
 
         <!-- FAQ-->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">FAQ</span></li>
