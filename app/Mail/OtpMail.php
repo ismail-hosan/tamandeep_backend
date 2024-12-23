@@ -12,18 +12,14 @@ use Illuminate\Queue\SerializesModels;
 class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
+     public $otp;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+   
+    public function __construct($otp)
     {
-        //
+        $this->otp = $otp;
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
         return new Envelope(
@@ -31,21 +27,15 @@ class OtpMail extends Mailable
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
+
+    public function build()
     {
-        return new Content(
-            view: 'view.name',
-        );
+        return $this->view('emails.otp')
+        ->with(['otp' => $this->otp])
+        ->subject('Your OTP Code');
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
+    
     public function attachments(): array
     {
         return [];

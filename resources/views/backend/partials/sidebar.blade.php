@@ -33,12 +33,12 @@
         {{-- ..................................................... --}}
 
         <!-- Trips -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Trips</span></li>
+        {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Trips</span></li> --}}
         <!-- Layouts -->
 
-          <li class="menu-header small text-uppercase"><span class="menu-header-text">Booking</span></li>
+          {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Booking</span></li> --}}
           <!-- CMS -->
-          <li class="menu-item">
+          {{-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                   <i class="menu-icon tf-icons bx bx-cog"></i>
                   <div data-i18n="Layouts">Booking</div>
@@ -52,7 +52,7 @@
                     <a class="menu-link" href="">All Payment</a>
                 </li>
               </ul>
-          </li>
+          </li> --}}
 
 
 
@@ -103,9 +103,9 @@
         {{-- ..................................................... --}}
 
         <!-- Blogs -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Blogs</span></li>
+        {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Blogs</span></li> --}}
         <!-- Layouts -->
-        <li
+        {{-- <li
             class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bxl-blogger"></i>
@@ -120,24 +120,24 @@
                 <li class="menu-item"><a class="menu-link"
                         href="">Blogs</a></li>
             </ul>
-        </li>
+        </li> --}}
 
 
         <!-- FAQ-->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">FAQ</span></li>
+        {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">FAQ</span></li>
 
         <li class="menu-item">
             <a href="" class="menu-link">
                 <i class='menu-icon tf-icons bx bxs-badge-check'></i>
                 <div data-i18n="Layouts">FAQ</div>
             </a>
-        </li>
+        </li> --}}
 
         <!-- User-->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">User</span></li>
 
-        <li class="menu-item">
-            <a href="" class="menu-link">
+        <li class="menu-item {{ Request::routeIs('user.index') ? 'active' : '' }}">
+            <a href="{{route('user.index')}}" class="menu-link">
                 <i class='menu-icon tf-icons bx bxs-user'></i>
                 <div data-i18n="Layouts">User</div>
             </a>

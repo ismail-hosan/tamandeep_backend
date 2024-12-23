@@ -143,9 +143,9 @@ class AuthController extends Controller
                 'code' => 404,
             ], 404);
         }
-        if (strval($user->otp) === strval($otp)) { 
-            $user->otp = null;
-            $user->save();
+        if (strval($user->otp) === strval($otp)) {
+            // $user->otp = null;
+            // $user->save();
 
             return response()->json([
                 'status' => true,
@@ -181,37 +181,34 @@ class AuthController extends Controller
             $otp = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
             $user->otp = $otp;
 
-            if ($user->save()) {
-                try {
-                    // Mail::to($user->email)->send(new OtpMail($otp));
-
-                    DB::commit();
-
-                    return response()->json([
-                        'status' => true,
-                        'message' => 'OTP sent successfully',
-                    ], 200);
-                } catch (\Exception $mailException) {
-                    DB::rollback();
-                    info($mailException->getMessage());
-
-                    return response()->json([
-                        'status' => false,
-                        'message' => 'Failed to send OTP. Please try again.',
-                    ], 500);
-                }
+            if (!$user->save()) {
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Failed to save OTP. Please try again.',
+                ], 500);
             }
+            $otp = $user->otp;
 
-            DB::rollback();
-
-            return response()->json([
-                'status' => false,
-                'message' => 'Failed to save OTP. Please try again.',
-            ], 500);
+            // Send OTP Email
+            try {
+                Mail::to($user->email)->send(new OtpMail($otp));
+                return response()->json([
+                    'status' => true,
+                    'message' => 'OTP sent successfully',
+                    'otp' => $user->otp, // Remove this in production for security
+                ], 200);
+            } catch (\Exception $mailException) {
+                dd('Mail Error: ' . $mailException->getMessage());
+                DB::rollback();
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Failed to send OTP. Please try again.',
+                ], 500);
+            }
         } catch (\Exception $e) {
+            Log::error('General Error: ' . $e->getMessage());
             DB::rollback();
-            dd($e->getMessage());
-
             return response()->json([
                 'status' => false,
                 'message' => 'An error occurred. Please try again later.',
@@ -228,31 +225,34 @@ class AuthController extends Controller
 
             if (!$user) {
                 return response()->json([
-                    'status'  => false,
+                    'status' => false,
                     'message' => 'User not found',
-                    'code'    => 404,
+                    'code' => 404,
                 ], 404);
             }
-           
+
             if (strval($request->otp) !== strval($user->otp)) {
                 return response()->json([
-                    'status'  => false,
+                    'status' => false,
                     'message' => 'Invalid OTP',
-                    'code'    => 401,
+                    'code' => 401,
                 ], 401);
             }
 
-            $user->password = bcrypt($request->input('new_password'));
+            $user->password = Hash::make($request->input('new_password'));
             $user->otp = null;
-            $user->save();
-        
+            $user->email_verified_at = now();
+            $user->update();
+
+            DB::commit();
+
             return response()->json([
-                'status'  => true,
+                'status' => true,
                 'message' => 'Password updated successfully'
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-           dd($e->getMessage());
+            Log::error($e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong. Please try again.',

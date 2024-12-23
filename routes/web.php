@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\Backend\DahboardController;
 use App\Http\Controllers\Web\Backend\FeaturesController;
 use App\Http\Controllers\Web\Backend\QrcodeController;
 use App\Http\Controllers\Web\Backend\SystemSettingController;
+use App\Http\Controllers\Web\Backend\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,6 +24,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/optimize-clear', function () {
+    Artisan::call('optimize:clear');
+    return response()->json(['message' => 'All caches cleared successfully']);
+})->name('optimize.clear');
+
 
 Route::get('/dashboard',[DahboardController::class,'index'])->name('dashboard')->middleware(['auth', 'verified']);
 
@@ -34,7 +40,6 @@ Route::middleware('auth')->group(function () {
 
 
 Route::middleware(['auth','verified'])->group(function () {
-   //!Route for SystemSettingController
    Route::controller(SystemSettingController::class)->group(function () {
         Route::get('/system-setting', 'index')->name('system.setting');
         Route::post('/system-setting', 'update')->name('system.update');
@@ -70,6 +75,18 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::post('/update/{id}', 'update')->name('features.update');
         Route::delete('/delete/{id}', 'destroy')->name('features.delete');
         Route::get('/status/{id}', 'status')->name('features.status');
+
+    });
+
+    //-------- User---------//
+    Route::prefix('user')->controller(UserController::class)->group(function () {
+        Route::get('/', 'index')->name('user.index');
+        Route::get('/create', 'create')->name('user.create');
+        Route::post('/store', 'store')->name('user.store');
+        Route::get('/edit/{id}', 'edit')->name('user.edit');
+        Route::post('/update/{id}', 'update')->name('user.update');
+        Route::delete('/delete/{id}', 'destroy')->name('user.delete');
+        Route::get('/status/{id}', 'status')->name('user.status');
 
     });
 
