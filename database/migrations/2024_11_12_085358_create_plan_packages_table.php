@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->decimal('price', 8, 2);
+            $table->string('price_id')->nullable();
             $table->enum('status', ['active','inactive'])->default('active');
             $table->text('description')->nullable();
             $table->timestamps();
