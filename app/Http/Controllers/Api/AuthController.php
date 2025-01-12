@@ -188,7 +188,7 @@ class AuthController extends Controller
                     'message' => 'Failed to save OTP. Please try again.',
                 ], 500);
             }
-            $otp = $user->otp;
+            $user->save();
 
             // Send OTP Email
             try {
