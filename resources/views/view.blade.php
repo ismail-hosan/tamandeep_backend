@@ -6,6 +6,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
     <title>About Me</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap') @tailwind base;
+
+        .mt-5 {
+            margin-top: 1.25rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .size-16 {
+            width: 4rem;
+            height: 4rem;
+        }
+
+        .h-20 {
+            height: 5rem;
+        }
+
+        .h-52 {
+            height: 13rem;
+        }
+
+        .h-full {
+            height: 100%;
+        }
+
+        .min-h-screen {
+            min-height: 100vh;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .max-w-xl {
+            max-width: 36rem;
+        }
+
+        .transform {
+            transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .resize-none {
+            resize: none;
+        }
+
+        .flex-col {
+            flex-direction: column;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .space-y-4> :not([hidden])~ :not([hidden]) {
+            --tw-space-y-reverse: 0;
+            margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+            margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+        }
+
+        .rounded-md {
+            border-radius: 0.375rem;
+        }
+
+        .border-none {
+            border-style: none;
+        }
+
+        .border-black\/10 {
+            border-color: rgb(0 0 0 / 0.1);
+        }
+
+        .bg-primaryColor {
+            --tw-bg-opacity: 1;
+            background-color: rgb(40 141 255 / var(--tw-bg-opacity, 1));
+        }
+
+        .object-cover {
+            -o-object-fit: cover;
+            object-fit: cover;
+        }
+
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .px-5 {
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .font-inter {
+            font-family: Inter, serif;
+        }
+
+        .text-base {
+            font-size: 1rem;
+            line-height: 1.5rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .text-xl {
+            font-size: 1.25rem;
+            line-height: 1.75rem;
+        }
+
+        .text-white {
+            --tw-text-opacity: 1;
+            color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+        }
+
+        .outline-none {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .focus\:outline-none:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+        }
+
+        @media (min-width: 768px) {
+            .md\:h-72 {
+                height: 18rem;
+            }
+
+            .md\:px-8 {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
