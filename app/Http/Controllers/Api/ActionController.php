@@ -22,7 +22,7 @@ class ActionController extends Controller
         $validator = Validator::make($request->all(), [
             'type' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', 
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -39,7 +39,7 @@ class ActionController extends Controller
             ['user_id' => $userId, 'name' => $type]
         );
 
-        $dataToStore = $request->except(['type', 'image', 'cover_image']); 
+        $dataToStore = $request->except(['type', 'image', 'cover_image']);
 
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -124,14 +124,14 @@ class ActionController extends Controller
             'product_types' => $data->productTypes->map(function ($productType) {
                 return $productType->data->map(function ($dataEntry) {
                     $decodedData = json_decode($dataEntry->data, true); // `true` for associative array
-                    
+    
                     return array_merge([
                         'id' => $dataEntry->id,
                         'type' => $dataEntry->Category->name,
-                        'active' => $dataEntry->active, 
+                        'active' => $dataEntry->active,
                     ], $decodedData);
                 });
-            })->flatten(1) 
+            })->flatten(1)
         ];
 
         // Return the data as a JSON response
@@ -140,6 +140,46 @@ class ActionController extends Controller
             'data' => $responseData
         ]);
     }
+
+    public function status($id)
+    {
+        $auth = Auth::user();
+        $check = Product_Type::where('user_id', $auth->id)
+            ->with('data') 
+            ->first();
+        if (!$check) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User is not authenticated or no product type found'
+            ], 401);
+        }
+        $data = Data::find($id);
+
+        if (!$data) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found'
+            ], 404);
+        }
+        foreach ($check->data as $relatedData) {
+            if ($relatedData->id !== $id) {
+                $relatedData->active = 0; // Set other data records as inactive
+                $relatedData->save();
+            }
+        }
+        $data->active = 1;
+        $data->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'The status of the data has been updated',
+            'data' => $data
+        ]);
+    }
+
+
+
+
 
 
 }

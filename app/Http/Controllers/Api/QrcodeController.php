@@ -49,7 +49,6 @@ class QrcodeController extends Controller
                 })
             ];
 
-            // Return the data as a view
             return view('view', ['data' => $responseData]);
 
         } catch (DecryptException $e) {

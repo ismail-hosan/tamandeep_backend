@@ -29,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
     Route::post('/action/store',[ActionController::class, 'store']);
     Route::get('/action/show',[ActionController::class, 'show']);
+    Route::get('/action/status/{id}',[ActionController::class, 'status']);
     
 });
 
