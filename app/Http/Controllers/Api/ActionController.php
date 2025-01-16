@@ -144,29 +144,42 @@ class ActionController extends Controller
     public function status($id)
     {
         $auth = Auth::user();
+
+        // Retrieve all product types for the authenticated user along with their related data
         $check = Product_Type::where('user_id', $auth->id)
-            ->with('data') 
-            ->first();
-        if (!$check) {
+            ->with('data')
+            ->get();
+
+        // Check if the user has any product types with data
+        if ($check->isEmpty() || $check->pluck('data')->flatten()->isEmpty()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User is not authenticated or no product type found'
             ], 401);
         }
+
+        // Find the data record by ID
         $data = Data::find($id);
 
+        // Check if the data exists
         if (!$data) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Data not found'
             ], 404);
         }
-        foreach ($check->data as $relatedData) {
-            if ($relatedData->id !== $id) {
-                $relatedData->active = 0; // Set other data records as inactive
-                $relatedData->save();
+
+        // Iterate over all product types and their related data to deactivate other data
+        foreach ($check as $productType) {
+            foreach ($productType->data as $relatedData) {
+                if ($relatedData->id !== $id) {
+                    $relatedData->active = 0; // Set other data records as inactive
+                    $relatedData->save();
+                }
             }
         }
+
+        // Set the current data as active
         $data->active = 1;
         $data->save();
 
