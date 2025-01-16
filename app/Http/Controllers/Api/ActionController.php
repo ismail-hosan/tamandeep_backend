@@ -163,11 +163,11 @@ class ActionController extends Controller
         }
         foreach ($check->data as $relatedData) {
             if ($relatedData->id !== $id) {
-                $relatedData->active = 1; // Set other data records as inactive
+                $relatedData->active = 0; // Set other data records as inactive
                 $relatedData->save();
             }
         }
-        $data->active = 0;
+        $data->active = 1;
         $data->save();
 
         return response()->json([
