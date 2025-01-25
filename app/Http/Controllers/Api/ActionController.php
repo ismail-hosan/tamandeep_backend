@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Data;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
+use App\Traits\apiresponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\UserQrcode;
@@ -17,9 +20,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ActionController extends Controller
 {
+    use apiresponse;
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'order_item_id' => 'required|integer',
             'type' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -33,10 +38,13 @@ class ActionController extends Controller
             ], 422);
         }
 
-        $userId = auth()->id();
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
         $type = $request->input('type');
         $productType = Product_Type::firstOrCreate(
-            ['user_id' => $userId, 'name' => $type]
+            ['order_item_id' => $request->order_item_id, 'name' => $type]
         );
 
         $dataToStore = $request->except(['type', 'image', 'cover_image']);
@@ -59,7 +67,7 @@ class ActionController extends Controller
                 'data' => json_encode($dataToStore)
             ]);
 
-            $existingQrCode = UserQrcode::where('user_id', $userId)->first();
+            $existingQrCode = UserQrcode::where('order_item_id', $request->order_item_id)->first();
 
             if ($existingQrCode) {
                 return response()->json([
@@ -71,19 +79,19 @@ class ActionController extends Controller
                 ]);
             }
 
-            $encryptedUserId = Crypt::encryptString($userId);
+            $encryptedUserId = Crypt::encryptString($request->order_item_id);
             $qrCodeUrl = route('user.view', ['id' => $encryptedUserId]);
             $qrCode = new QrCode($qrCodeUrl);
             $writer = new PngWriter();
             $qrCodeImage = $writer->write($qrCode)->getString();
 
             // Save QR code image
-            $qrCodeFileName = 'qr_code_' . $userId . '.png';
+            $qrCodeFileName = 'qr_code_' . $request->order_item_id . '.png';
             Storage::disk('public')->put('qrcodes/' . $qrCodeFileName, $qrCodeImage);
 
             // Save QR code entry
             $qrCodeEntry = UserQrcode::create([
-                'user_id' => $userId,
+                'order_item_id' => $request->order_item_id,
                 'file_path' => 'qrcodes/' . $qrCodeFileName,
             ]);
         } catch (\Exception $e) {
@@ -98,16 +106,20 @@ class ActionController extends Controller
             'status' => 'success',
             'product_type' => $productType,
             'data' => $dataEntry,
-            'qr_code_url' => asset('storage/qrcodes/' . $qrCodeFileName),
-            'qr_code_entry' => $qrCodeEntry,
+            'qr_code_url' => $qrCodeFileName,
             'image_path' => $imagePath ? asset('storage/' . $imagePath) : null,
             'cover_image_path' => $coverImagePath ? asset('storage/' . $coverImagePath) : null
         ]);
     }
 
-    public function show()
+    public function show($id)
     {
-        $data = User::with(['productTypes.data', 'qrcodes'])->find(Auth::user()->id);
+        $res = $this->check($id);
+        if ($res) {
+            return $res;
+        }
+        $data = OrderItem::with(['product.data', 'qrcodes'])->find($id);
+        // $data = User::with(['productTypes.data', 'qrcodes'])->find(Auth::user()->id);
 
         // Check if user exists
         if (!$data) {
@@ -119,10 +131,10 @@ class ActionController extends Controller
 
         // Prepare the response data
         $responseData = [
-            'user' => $data->only(['id', 'name', 'email']),
+            // 'user' => $data->only(['id', 'name', 'email']),
             'qrcode' => $data->qrcodes ? Storage::url($data->qrcodes->file_path) : null,
-            'product_types' => $data->productTypes->map(function ($productType) {
-                return $productType->data->map(function ($dataEntry) {
+            'product_types' => $data->product->map(function ($product) {
+                return $product->data->map(function ($dataEntry) {
                     $decodedData = json_decode($dataEntry->data, true); // `true` for associative array
     
                     return array_merge([
@@ -135,10 +147,11 @@ class ActionController extends Controller
         ];
 
         // Return the data as a JSON response
-        return response()->json([
-            'status' => 'success',
-            'data' => $responseData
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'data' => $responseData
+        // ]);
+        return $this->success($responseData, 'Data Fatch success', 200);
     }
 
     public function status($id)
@@ -146,22 +159,16 @@ class ActionController extends Controller
         $auth = Auth::user();
 
         // Retrieve all product types for the authenticated user along with their related data
-        $check = Product_Type::where('user_id', $auth->id)
+        $check = Product_Type::where('order_item_id', $auth->id)
             ->with('data')
             ->get();
 
         // Check if the user has any product types with data
         if ($check->isEmpty() || $check->pluck('data')->flatten()->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User is not authenticated or no product type found'
-            ], 401);
+            return $this->error([], 'User is not authenticated or no product type found', 401);
         }
 
-        // Find the data record by ID
         $data = Data::find($id);
-
-        // Check if the data exists
         if (!$data) {
             return response()->json([
                 'status' => 'error',
@@ -178,16 +185,28 @@ class ActionController extends Controller
                 }
             }
         }
-
-        // Set the current data as active
         $data->active = 1;
         $data->save();
+        return $this->success($data, 'Data Fatch', 200);
+    }
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'The status of the data has been updated',
-            'data' => $data
-        ]);
+
+    private function check($order_item_id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return $this->error([], 'User not authenticated', 401);
+        }
+        if (!$user->order()->exists()) {
+            return $this->error([], 'Order not found for this user', 404); // 404 Not Found
+        }
+        $order = $user->order()->first();
+        $orderItem = $order->items()->where('id', $order_item_id)->first();
+
+        if (!$orderItem) {
+            return $this->error([], 'Order item not found or does not belong to this user\'s order', 404); // 404 Not Found
+        }
+        return null;
     }
 
 

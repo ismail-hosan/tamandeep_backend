@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_qrcodes', function (Blueprint $table) {
+        Schema::create('cards', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_item_id'); // Links to the users table
-            $table->string('file_path'); // Path to the QR code image
+            $table->string('code')->nullable();
+            $table->double('price')->nullable();
+            $table->string('image')->nullable();
+            $table->enum('status', ['active','inactive'])->default('active');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_qrcodes');
+        Schema::dropIfExists('cards');
     }
 };

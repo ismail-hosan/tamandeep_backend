@@ -8,8 +8,7 @@
                 @if ($setting && $setting->logo)
                     <img src="{{ asset($setting->logo) }}" style="height: 95px;width: 176px;" alt="Logo">
                 @else
-                    <img src="{{ asset('system/logo/demo.png') }}" style="height: 95px;width: 176px;"
-                        alt="Default Logo">
+                    <img src="{{ asset('system/logo/demo.png') }}" style="height: 95px;width: 176px;" alt="Default Logo">
                 @endif
             </a>
         </a>
@@ -24,7 +23,7 @@
     <ul class="menu-inner py-1">
 
         <li class="menu-item {{ Request::routeIs('dashboard') ? 'active' : '' }}">
-            <a class="menu-link" href="{{route('dashboard')}}">
+            <a class="menu-link" href="{{ route('dashboard') }}">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <span class="menu-title">Dashboard</span>
             </a>
@@ -36,9 +35,9 @@
         {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Trips</span></li> --}}
         <!-- Layouts -->
 
-          {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Booking</span></li> --}}
-          <!-- CMS -->
-          {{-- <li class="menu-item">
+        {{-- <li class="menu-header small text-uppercase"><span class="menu-header-text">Booking</span></li> --}}
+        <!-- CMS -->
+        {{-- <li class="menu-item">
               <a href="javascript:void(0);" class="menu-link menu-toggle">
                   <i class="menu-icon tf-icons bx bx-cog"></i>
                   <div data-i18n="Layouts">Booking</div>
@@ -54,6 +53,15 @@
               </ul>
           </li> --}}
 
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">CARD</span></li>
+
+        <li class="menu-item {{ Request::routeIs('card.index') ? 'active' : '' }}">
+            <a class="menu-link" href="{{route('card.index')}}">
+                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                <span class="menu-title">CARD</span>
+            </a>
+        </li>
+
 
 
         {{-- ..................................................... --}}
@@ -68,33 +76,33 @@
 
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{route('cms.index')}}">Landing Page</a>
+                    <a class="menu-link" href="{{ route('cms.index') }}">Landing Page</a>
                 </li>
             </ul>
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{route('features.index')}}">Features</a>
+                    <a class="menu-link" href="{{ route('features.index') }}">Features</a>
                 </li>
             </ul>
 
             {{-- Review --}}
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{route('review.index')}}">Reviews</a>
+                    <a class="menu-link" href="{{ route('review.index') }}">Reviews</a>
                 </li>
             </ul>
 
             {{-- Brand Logo --}}
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{route('brandlogo.index')}}">Brand Logos</a>
+                    <a class="menu-link" href="{{ route('brandlogo.index') }}">Brand Logos</a>
                 </li>
             </ul>
 
             {{-- Plan Packages --}}
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{route('planpackage.index')}}">Plan Packages</a>
+                    <a class="menu-link" href="{{ route('planpackage.index') }}">Plan Packages</a>
                 </li>
             </ul>
         </li>
@@ -137,7 +145,7 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">User</span></li>
 
         <li class="menu-item {{ Request::routeIs('user.index') ? 'active' : '' }}">
-            <a href="{{route('user.index')}}" class="menu-link">
+            <a href="{{ route('user.index') }}" class="menu-link">
                 <i class='menu-icon tf-icons bx bxs-user'></i>
                 <div data-i18n="Layouts">User</div>
             </a>
@@ -150,29 +158,26 @@
         <!-- Settings -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Settings</span></li>
         <!-- Layouts -->
-        <li
-            class="menu-item">
+        <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div data-i18n="Layouts">Settings</div>
             </a>
 
             <ul class="menu-sub">
-                <li class="menu-item"><a
-                        class="menu-link" href="{{route('system.setting')}}">System Settings</a></li>
+                <li class="menu-item"><a class="menu-link" href="{{ route('system.setting') }}">System Settings</a>
+                </li>
 
-                <li class="menu-item"><a
-                        class="menu-link" href="{{route('system.mail.index')}}">Mail Setting</a></li>
+                <li class="menu-item"><a class="menu-link" href="{{ route('system.mail.index') }}">Mail Setting</a>
+                </li>
                 {{-- <li class="menu-item {{ Request::routeIs('admin.social-light-page*') ? 'active' : '' }}"><a class="menu-link"
                         href="{{ route('admin.social-light-page') }}">Social Light</a></li> --}}
 
                 {{-- <li class="menu-item {{ Request::routeIs('admin.dynamic_page.*') ? 'active' : '' }}"><a
                         class="menu-link" href="{{ route('admin.dynamic_page.index') }}">Add Dynamic Page</a></li> --}}
 
-                <li class="menu-item"><a class="menu-link"
-                        href="{{route('stripe.index')}}">Stripe</a></li>
-                <li class="menu-item"><a class="menu-link"
-                            href="{{route('paypal.index')}}">Paypal</a></li>
+                <li class="menu-item"><a class="menu-link" href="{{ route('stripe.index') }}">Stripe</a></li>
+                <li class="menu-item"><a class="menu-link" href="{{ route('paypal.index') }}">Paypal</a></li>
             </ul>
         </li>
 
@@ -180,7 +185,7 @@
 
         {{-- prifile seatting --}}
         <li class="menu-item">
-            <a class="menu-link" href="{{route('profilesetting')}}">
+            <a class="menu-link" href="{{ route('profilesetting') }}">
                 <i class="menu-icon tf-icons bx bxs-user-account"></i>
                 <div data-i18n="Support">Profile Setting</div>
             </a>

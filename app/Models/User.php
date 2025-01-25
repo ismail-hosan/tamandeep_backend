@@ -31,13 +31,15 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function order()
+    {
+        return $this->hasMany(Order::class,'user_id');
+    }   
+
     public function productTypes()
     {
         return $this->hasMany(Product_Type::class, 'user_id');
     }
 
-    public function qrcodes()
-    {
-        return $this->hasOne(UserQrcode::class); 
-    }
+   
 }

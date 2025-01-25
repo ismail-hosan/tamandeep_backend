@@ -7,14 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Run the migrations. v   
      */
     public function up(): void
     {
-        Schema::create('user_qrcodes', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_item_id'); // Links to the users table
-            $table->string('file_path'); // Path to the QR code image
+            $table->foreignId('order_id')->constrained();
+            $table->foreignId('card_id')->constrained();
+            $table->string('unique_code')->nullable();
+            $table->string('qr_code')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_qrcodes');
+        Schema::dropIfExists('order_items');
     }
 };

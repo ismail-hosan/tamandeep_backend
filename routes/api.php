@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\ActionController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CardController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CMSController;
 use App\Http\Controllers\Api\QrcodeController;
 use Illuminate\Http\Request;
@@ -28,8 +30,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/logout', [AuthController::class, 'logout']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
     Route::post('/action/store',[ActionController::class, 'store']);
-    Route::get('/action/show',[ActionController::class, 'show']);
+    Route::get('/action/show/{id}',[ActionController::class, 'show']);
     Route::get('/action/status/{id}',[ActionController::class, 'status']);
+
+    Route::prefix('card')->group(function () {
+        Route::get('/', [CardController::class,'index']);
+    });
+
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [CartController::class,'index']);
+        Route::post('/create', [CartController::class,'store']);
+    });
     
 });
 

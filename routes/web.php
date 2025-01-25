@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Web\Backend\CardController;
 use App\Http\Controllers\Web\Backend\CMSController;
 use App\Http\Controllers\Web\Backend\DahboardController;
 use App\Http\Controllers\Web\Backend\FeaturesController;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('login');
 });
 
 Route::get('/optimize-clear', function () {
@@ -87,6 +88,19 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::post('/update/{id}', 'update')->name('user.update');
         Route::delete('/delete/{id}', 'destroy')->name('user.delete');
         Route::get('/status/{id}', 'status')->name('user.status');
+
+    });
+
+
+    //-------- Card---------//
+    Route::prefix('admincard')->controller(CardController::class)->group(function () {
+        Route::get('/', 'index')->name('card.index');
+        Route::get('/create', 'create')->name('card.create');
+        Route::post('/store', 'store')->name('card.store');
+        Route::get('/edit/{id}', 'edit')->name('card.edit');
+        Route::post('/update/{id}', 'update')->name('card.update');
+        Route::delete('/delete/{id}', 'destroy')->name('card.delete');
+        Route::get('/status/{id}', 'status')->name('card.status');
 
     });
 
