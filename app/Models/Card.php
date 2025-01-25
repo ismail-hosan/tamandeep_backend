@@ -22,5 +22,10 @@ class Card extends Model
         return $value ? url($value) : null;
     }
 
+    public function getPriceAttribute($value)
+    {
+        return number_format((float) $value, 2, '.', '');
+    }
+
 
 }
