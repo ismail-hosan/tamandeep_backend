@@ -19,15 +19,18 @@ class CartController extends Controller
             ->with(['items.product', 'items.color'])
             ->first();
 
-        if ($cart) {
+
+        if (!$cart) {
+            return $this->success([], 'Cart Not Found', 200);
+        } else {
             $cart->items = $cart->items->map(function ($item) {
                 return [
+                    'id' => $item->id,
                     'product_price' => $item->product ? $item->product->price : null,
                     'color_name' => $item->color ? $item->color->name : null,
                 ];
             });
         }
-
         return $this->success($cart->items, 'Data fetched successfully', 200);
     }
     public function store(Request $request)
