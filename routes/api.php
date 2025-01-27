@@ -33,15 +33,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/action/show/{id}',[ActionController::class, 'show']);
     Route::get('/action/status/{id}',[ActionController::class, 'status']);
 
-    Route::prefix('card')->group(function () {
-        Route::get('/', [CardController::class,'index']);
-    });
+   
 
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class,'index']);
         Route::post('/create', [CartController::class,'store']);
     });
     
+});
+
+Route::prefix('card')->group(function () {
+    Route::get('/', [CardController::class,'index']);
 });
 
 Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');
