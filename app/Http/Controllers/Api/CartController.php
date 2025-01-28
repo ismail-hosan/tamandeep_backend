@@ -36,11 +36,13 @@ class CartController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|integer',
-            'quantity' => 'required|integer',
-            'color_id' => 'required|integer',
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|integer', 
+            'products.*.quantity' => 'required|integer',
+            // 'products.*.color_id' => 'required|integer',
         ]);
 
+        // Get the authenticated user
         $user = auth()->user();
 
         if ($validator->fails()) {
@@ -51,24 +53,30 @@ class CartController extends Controller
             ], 422);
         }
 
+        // Create or get the user's cart
         $cart = Cart::firstOrCreate(
             ['user_id' => $user->id],
             ['created_at' => now(), 'updated_at' => now()]
         );
 
-        // Add or update the cart item
-        $cartItem = CartItems::updateOrCreate(
-            [
-                'cart_id' => $cart->id,
-                'card_id' => $request->product_id,
-            ],
-            [
-                'quantity' => $request->quantity,
-                'color_id' => $request->color_id,
-            ]
-        );
-        return $this->success($cart, 'Cart add succefully!', 200);
+        // Loop through each product in the array and add or update the cart items
+        foreach ($request->products as $product) {
+            CartItems::updateOrCreate(
+                [
+                    'cart_id' => $cart->id,
+                    'card_id' => $product['product_id'], // Make sure the key is 'product_id' not 'card_id'
+                ],
+                [
+                    'quantity' => $product['quantity'],
+                ]
+            );
+        }
 
-
+        // Return a success response
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Products added to cart successfully!',
+            'data' => $cart,
+        ], 200);
     }
 }

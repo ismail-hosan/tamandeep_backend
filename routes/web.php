@@ -35,7 +35,7 @@ Route::get('/dashboard',[DahboardController::class,'index'])->name('dashboard')-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update.dad');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -52,7 +52,7 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/system/paypal', 'paypalindex')->name('paypal.index');
         Route::post('/system/paypal', 'paypalstore')->name('paypal.store');
         Route::post('/profile', 'profileupdate')->name('profile.update');
-        Route::post('password', 'passwordupdate')->name('password.update');
+        Route::post('password', 'passwordupdate')->name('password.update.ada');
         //  Route::post('/pro', 'paypalstore')->name('paypal.store');
     });
     Route::prefix('admin')->controller(CMSController::class)->group(function () {
