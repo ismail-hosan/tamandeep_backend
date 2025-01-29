@@ -86,20 +86,23 @@ class CheckoutController extends Controller
                 'line_items' => $cart->items->map(function ($item) {
                     return [
                         'price_data' => [
-                            'currency' => 'usd',
+                            'currency' => 'usd', // Adjust the currency if needed
                             'product_data' => [
-                                'name' => $item->product->code,
-                                'description' => $item->product->description ?? 'No description available',
-                                'images' => [$item->product->image],
+                                'name' => $item->product->code, // Product code as the product name
+                                'description' => $item->product->description ?? 'No description available', // Optional description
+                                'images' => [$item->product->image], // Optional product image URL
                             ],
                             'unit_amount' => (int) round($item->product->price * 100), // Price in cents
                         ],
-                        'quantity' => $item->quantity,
+                        'quantity' => $item->quantity, // Quantity of the item
                     ];
                 })->toArray(),
                 'mode' => 'payment',
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
+                'metadata' => [
+                    'order_id' => $payment->id, // Attach order ID to metadata
+                ],
             ]);
 
             // Return the session URL

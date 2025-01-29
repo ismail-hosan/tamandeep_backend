@@ -39,7 +39,7 @@ class CartController extends Controller
             'products' => 'required|array',
             'products.*.product_id' => 'required|integer', 
             'products.*.quantity' => 'required|integer',
-            // 'products.*.color_id' => 'required|integer',
+            'products.*.color_id' => 'required|integer',
         ]);
 
         // Get the authenticated user
@@ -68,6 +68,7 @@ class CartController extends Controller
                 ],
                 [
                     'quantity' => $product['quantity'],
+                    'color_id' => $product['color-id']
                 ]
             );
         }
