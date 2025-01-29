@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Card;
+use App\Models\CardColor;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\User;
@@ -27,22 +29,60 @@ class CheckoutController extends Controller
             ], 401);
         }
 
-        // Fetch the user's cart
-        $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
-        if (!$cart || $cart->items->isEmpty()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No items in cart.',
-            ], 422);
-        }
+        // Validate request data (assuming product_id, color_id, and quantity are passed in request)
+        $request->validate([
+            'items' => 'required|array', // 'items' is an array of product data
+            'items.*.product_id' => 'required|exists:cards,id',
+            'items.*.color_id' => 'nullable|exists:card_colors,id', // Assuming color_id is optional
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
 
-        // Calculate the total amount for the cart
+        // Initialize variables
         $total = 0;
         $product_ids = [];
-        foreach ($cart->items as $cartItem) {
-            $productPrice = $cartItem->product->price;
-            $total += $productPrice * $cartItem->quantity;
-            $product_ids[] = $cartItem->product->id;
+
+        // Loop through the items in the cart
+        $line_items = [];
+        foreach ($request->items as $itemData) {
+            $product = Card::find($itemData['product_id']);
+
+            // If product is not found, skip this item or return an error
+            if (!$product) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Product with ID {$itemData['product_id']} not found.",
+                ], 404);
+            }
+
+            // If there's a color_id, ensure it's valid for this product (if applicable)
+            if ($itemData['color_id']) {
+                $color = CardColor::find($itemData['color_id']);
+                if (!$color || !$product->colors->contains($color)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "Invalid color selected for this product.",
+                    ], 422);
+                }
+            }
+
+            // Calculate the total for this product (use price and quantity)
+            $price = $product->price; // or $product->colors()->where('id', $itemData['color_id'])->first()->price if color affects price
+            $total += $price * $itemData['quantity'];
+            $product_ids[] = $product->id;
+
+            // Prepare line item for Stripe
+            $line_items[] = [
+                'price_data' => [
+                    'currency' => 'usd', // Adjust currency as needed
+                    'product_data' => [
+                        'name' => $item->product->name ?? $item->product->code ?? 'Unnamed Product', // Fallback to 'Unnamed Product' if both are missing
+                        'description' => $item->product->description ?? 'No description available',
+                        'images' => [$item->product->image ?? 'default_image_url'], // Optional image URL
+                    ],
+                    'unit_amount' => (int) round($price * 100), // Price in cents
+                ],
+                'quantity' => $itemData['quantity'], // Quantity of the product
+            ];
         }
 
         // Ensure total is greater than 0
@@ -73,30 +113,12 @@ class CheckoutController extends Controller
                 'product_ids' => json_encode($product_ids),
                 'payment_method' => 'stripe',
                 'status' => 'pending',  // Set status to 'pending'
-                // 'phone' => $request->phone,
-                // 'address' => $request->address,
-                // 'town' => $request->town,
-                // 'state' => $request->state,
-                // 'postal_code' => $request->postal_code,
             ]);
 
             // Create Stripe Checkout session
             $session = Session::create([
                 'payment_method_types' => ['card'],
-                'line_items' => $cart->items->map(function ($item) {
-                    return [
-                        'price_data' => [
-                            'currency' => 'usd', // Adjust the currency if needed
-                            'product_data' => [
-                                'name' => $item->product->code, // Product code as the product name
-                                'description' => $item->product->description ?? 'No description available', // Optional description
-                                'images' => [$item->product->image], // Optional product image URL
-                            ],
-                            'unit_amount' => (int) round($item->product->price * 100), // Price in cents
-                        ],
-                        'quantity' => $item->quantity, // Quantity of the item
-                    ];
-                })->toArray(),
+                'line_items' => $line_items,
                 'mode' => 'payment',
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
