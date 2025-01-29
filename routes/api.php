@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\CMSController;
 use App\Http\Controllers\Api\QrcodeController;
+use App\Http\Controllers\Api\StripeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -57,3 +58,4 @@ Route::prefix('card')->group(function () {
 });
 
 Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');
+Route::post('stripe/webhook', [StripeController::class, 'handle']);
