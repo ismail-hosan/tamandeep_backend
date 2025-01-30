@@ -147,8 +147,9 @@ class CheckoutController extends Controller
 
     public function success()
     {
-        return response()->json(['status' => 'success']);
+        return redirect()->away(env('FRONTEND_URL'));
     }
+
 
     public function cancel()
     {
