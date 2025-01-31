@@ -84,6 +84,7 @@ class CardController extends Controller
             ? ImageHelper::handleImageUpload($request->file('image'), null, 'card')
             : null;
         $card = new $this->cards();
+        $card->name = $request->name;
         $card->price = $request->price;
         $card->image = $imagePath;
 
@@ -130,6 +131,7 @@ class CardController extends Controller
     public function update($id, UpdateCardRequest $request)
     {
         $card = $this->cards->findOrFail($id);
+        $card->name = $request->name;
         $card->price = $request->price;
         if ($request->hasFile('image')) {
             if ($card->image && file_exists(public_path($card->image))) {

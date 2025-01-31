@@ -20,9 +20,18 @@
                         <h4 class="card-title">Edit Card Package</h4>
                         <div class="mt-4">
                             <div class="mt-4">
-                                <form class="forms-sample" action="{{ route('card.update',$card->id) }}" method="POST"
+                                <form class="forms-sample" action="{{ route('card.update', $card->id) }}" method="POST"
                                     enctype="multipart/form-data">
                                     @csrf
+
+                                    <div class="form-group mb-3">
+                                        <label class="form-lable required">Name:</label>
+                                        <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                            id="name" name="name" value="{{ old('name', $card->name ?? '') }}">
+                                        @error('name')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
 
                                     <!-- Price Field -->
                                     <div class="form-group mb-3">

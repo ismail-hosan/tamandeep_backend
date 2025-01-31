@@ -43,6 +43,7 @@ class CheckoutController extends Controller
 
         // Loop through the items in the cart
         $line_items = [];
+        $metadata_items = [];  // Array to hold metadata items for each product
         foreach ($request->items as $itemData) {
             $product = Card::find($itemData['product_id']);
 
@@ -75,13 +76,19 @@ class CheckoutController extends Controller
                 'price_data' => [
                     'currency' => 'usd', // Adjust currency as needed
                     'product_data' => [
-                        'name' => $item->product->name ?? $item->product->code ?? 'Unnamed Product', // Fallback to 'Unnamed Product' if both are missing
-                        'description' => $item->product->description ?? 'No description available',
-                        'images' => [$item->product->image ?? 'default_image_url'], // Optional image URL
+                        'name' => $product->name ?? 'Unnamed Product',
+                        'description' => $product->description ?? 'No description available',
+                        'images' => [$product->image ?? 'default_image_url'], // Optional image URL
                     ],
                     'unit_amount' => (int) round($price * 100), // Price in cents
                 ],
                 'quantity' => $itemData['quantity'], // Quantity of the product
+            ];
+
+            // Add product_id and quantity to metadata for tracking
+            $metadata_items[] = [
+                'product_id' => (string) $product->id,  // Ensure product_id is a string
+                'quantity' => (string) $itemData['quantity'],  // Ensure quantity is a string
             ];
         }
 
@@ -110,7 +117,7 @@ class CheckoutController extends Controller
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'amount' => $total,
-                'product_ids' => json_encode($product_ids),
+                'product_ids' => json_encode($product_ids), // Use json_encode to store product_ids
                 'payment_method' => 'stripe',
                 'status' => 'pending',  // Set status to 'pending'
             ]);
@@ -123,7 +130,8 @@ class CheckoutController extends Controller
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
                 'metadata' => [
-                    'order_id' => $payment->id, // Attach order ID to metadata
+                    'order_id' => (string) $payment->id,  // Ensure order_id is a string
+                    'items' => json_encode($metadata_items),  // Convert the items metadata array to a JSON string
                 ],
             ]);
 

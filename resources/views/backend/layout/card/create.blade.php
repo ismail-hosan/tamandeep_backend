@@ -23,6 +23,14 @@
                             <form class="forms-sample"action="{{ route('card.store') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
+                                <div class="form-group mb-3">
+                                    <label class="form-lable required">Name:</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                        id="name" name="name" value="{{ old('price') }}">
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
                                 <div class="form-group mb-3">
                                     <label class="form-lable required">Price:</label>

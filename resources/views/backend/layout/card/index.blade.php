@@ -23,6 +23,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Name</th>
                                         <th>Price</th>
                                         <th>Code</th>
                                         <th>Color</th>
@@ -95,6 +96,12 @@
                             name: 'DT_RowIndex',
                             orderable: false,
                             searchable: false
+                        },
+                        {
+                            data: 'name',
+                            name: 'name',
+                            orderable: true,
+                            searchable: true
                         },
                         {
                             data: 'price',
