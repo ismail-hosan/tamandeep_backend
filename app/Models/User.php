@@ -12,20 +12,20 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-  
+
     protected $fillable = [
         'name',
         'email',
         'password',
     ];
 
-    
+
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    
+
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -33,13 +33,18 @@ class User extends Authenticatable
 
     public function order()
     {
-        return $this->hasMany(Order::class,'user_id');
-    }   
+        return $this->hasMany(Order::class, 'user_id');
+    }
 
     public function productTypes()
     {
         return $this->hasMany(Product_Type::class, 'user_id');
     }
 
-   
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+
 }

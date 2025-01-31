@@ -109,10 +109,31 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user) {
-            return response()->json([
-                'status' => 'success',
-                'user' => $user,
-            ]);
+            // Get the last order for the user
+            $order = $user->orders()->latest()->first();
+
+            if ($order) {
+                $lastPayment = $order->payments()->latest()->first();
+
+                if ($lastPayment) {
+                    $paymentStatus = $lastPayment->status;
+                } else {
+                    $paymentStatus = 'pending';
+                }
+
+                return response()->json([
+                    'status' => 'success',
+                    'user' => $user,
+                    'has_order' => $order !== null,
+                    'payment_status' => $paymentStatus,
+                ]);
+            } else {
+                // No orders for this user
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'User has no orders',
+                ]);
+            }
         } else {
             return response()->json([
                 'status' => 'error',
