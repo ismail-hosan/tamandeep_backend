@@ -40,10 +40,10 @@ class CheckoutController extends Controller
         // Initialize variables
         $total = 0;
         $product_ids = [];
+        $metadata_items = [];  // Array to hold metadata items for each product
 
         // Loop through the items in the cart
         $line_items = [];
-        $metadata_items = [];  // Array to hold metadata items for each product
         foreach ($request->items as $itemData) {
             $product = Card::find($itemData['product_id']);
 
@@ -85,7 +85,7 @@ class CheckoutController extends Controller
                 'quantity' => $itemData['quantity'], // Quantity of the product
             ];
 
-            // Add product_id and quantity to metadata for tracking
+            // Add product_id and quantity to metadata for tracking (ensure they are strings)
             $metadata_items[] = [
                 'product_id' => (string) $product->id,  // Ensure product_id is a string
                 'quantity' => (string) $itemData['quantity'],  // Ensure quantity is a string
