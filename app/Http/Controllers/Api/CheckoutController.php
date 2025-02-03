@@ -100,6 +100,7 @@ class CheckoutController extends Controller
 
             // Add product_id and quantity to metadata
             $metadata_items[] = [
+                'user_id'=> auth()->user()->id,
                 'product_id' => (string) $product->id,
                 'quantity' => (string) $item->quantity,
             ];
@@ -166,10 +167,9 @@ class CheckoutController extends Controller
     public function success(Request $request)
     {
         $cart = Cart::where('user_id', auth()->id())->first();
-dd($cart);
         if ($cart) {
             foreach ($cart->items as $item) {
-                $item->delete();  // Delete each item
+                $item->delete();  
             }
             $cart->delete();
         }

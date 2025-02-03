@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Card;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
@@ -50,6 +51,7 @@ class StripeController extends Controller
                 case 'checkout.session.completed':
                     $paymentIntent = $event->data->object; // Contains Stripe\PaymentIntent
                     $payment = Payment::find($paymentIntent->metadata->order_id);
+                    $user = $paymentIntent->metadata->user_id;
 
                     if ($payment) {
                         $payment->status = 'success';  // Update the payment status to 'success'
@@ -81,7 +83,7 @@ class StripeController extends Controller
                                     $orderItem = OrderItem::create([
                                         'order_id' => $order->id,           // Link the order item to the created order
                                         'card_id' => $product->id,
-                                        'unique_code' => $uniqueId,         
+                                        'unique_code' => $uniqueId,
                                     ]);
 
                                     $encryptedUserId = Crypt::encryptString($orderItem->id);
@@ -97,6 +99,10 @@ class StripeController extends Controller
                                     // Update the order_item with the QR code path
                                     $orderItem->qr_code = 'qrcodes/' . $qrCodeFileName;
                                     $orderItem->save();
+                                }
+                                $cartItems = Cart::where('user_id', $user)->with('itemss')->get();
+                                foreach ($cartItems->items as $cartItem) {
+                                    $cartItem->delete();  // Remove cart item from the cart
                                 }
                             } else {
                                 // Log if the product is not found
