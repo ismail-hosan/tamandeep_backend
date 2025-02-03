@@ -19,7 +19,6 @@ class CartController extends Controller
             ->with(['items.product', 'items.color'])
             ->first();
 
-
         if (!$cart) {
             return $this->success([], 'Cart Not Found', 200);
         } else {
@@ -30,6 +29,7 @@ class CartController extends Controller
                     'quantity' => $item->quantity,
                     'product_price' => $item->product ? $item->product->price : null,
                     'color_name' => $item->color ? $item->color->name : null,
+                    'color_id' =>$item->color_id,
                 ];
             });
         }
@@ -38,7 +38,7 @@ class CartController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|integer',
+            'id' => 'required|integer',
             'quantity' => 'required|integer',
             'color_id' => 'required|integer',
         ]);
@@ -54,30 +54,34 @@ class CartController extends Controller
             ], 422);
         }
 
-        // Create or get the user's cart
         $cart = Cart::firstOrCreate(
             ['user_id' => $user->id],
             ['created_at' => now(), 'updated_at' => now()]
         );
 
-        // Loop through each product in the array and add or update the cart items
         CartItems::updateOrCreate(
             [
                 'cart_id' => $cart->id,
-                'card_id' => $request['product_id'], // Make sure the key is 'product_id' not 'card_id'
+                'card_id' => $request['id'],
+                'color_id' => $request['color_id'],
             ],
             [
-                'quantity' => $request['quantity'],
-                'color_id' => $request['color_id']
+                'quantity' => $request['quantity'],  
             ]
         );
+        $cart->load(['items.product', 'items.color']);
+        $cart->items = $cart->items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'image' => $item->product->image,
+                'quantity' => $item->quantity,
+                'product_price' => $item->product ? $item->product->price : null,
+                'color_name' => $item->color ? $item->color->name : null,
+            ];
+        });
 
-        // Return a success response
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Products added to cart successfully!',
-            'data' => $cart,
-        ], 200);
+        return $this->success($cart->items, 'Cart Store Successfully!', 200);
+
     }
 
     public function quantity(Request $request)
@@ -103,7 +107,6 @@ class CartController extends Controller
             ['user_id' => $user->id],
             ['created_at' => now(), 'updated_at' => now()]
         );
-        // Loop through each product in the array and add or update the cart items
         $cart_items = CartItems::updateOrCreate(
             [
                 'cart_id' => $cart->id,
@@ -114,6 +117,6 @@ class CartController extends Controller
             ]
         );
 
-        return $this->success($cart_items,'Quantity Changes Successfully!!',200);
+        return $this->success($cart_items, 'Quantity Changes Successfully!!', 200);
     }
 }

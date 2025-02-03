@@ -81,7 +81,7 @@ class StripeController extends Controller
                                     $orderItem = OrderItem::create([
                                         'order_id' => $order->id,           // Link the order item to the created order
                                         'card_id' => $product->id,
-                                        'unique_id' => $uniqueId,         
+                                        'unique_code' => $uniqueId,         
                                     ]);
 
                                     $encryptedUserId = Crypt::encryptString($orderItem->id);
