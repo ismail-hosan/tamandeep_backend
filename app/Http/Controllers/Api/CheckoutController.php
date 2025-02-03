@@ -110,16 +110,13 @@ class CheckoutController extends Controller
         }
 
         try {
-            // Initialize Stripe API
             Stripe::setApiKey($stripeApiKey);
-
-            // Create payment record (with pending status)
             $payment = Payment::create([
                 'user_id' => $user->id,
                 'amount' => $total,
-                'product_ids' => json_encode($product_ids), // Use json_encode to store product_ids
+                'product_ids' => json_encode($product_ids),
                 'payment_method' => 'stripe',
-                'status' => 'pending',  // Set status to 'pending'
+                'status' => 'pending', 
             ]);
 
             // Create Stripe Checkout session

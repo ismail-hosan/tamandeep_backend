@@ -18,6 +18,6 @@ class Order extends Model
 
     public function payments()
     {
-        return $this->belongsTo(Payment::class);
+        return $this->belongsTo(Payment::class,'payment_id');
     }
 }

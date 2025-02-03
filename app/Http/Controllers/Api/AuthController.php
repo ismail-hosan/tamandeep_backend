@@ -9,6 +9,7 @@ use App\Http\Requests\PasswordUpdateRequest;
 use App\Mail\OtpMail;
 use App\Models\C_M_S;
 use App\Models\User;
+use App\Traits\apiresponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    use apiresponse;
 
     // public function test(Request $request)
     // {
@@ -108,38 +110,35 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if ($user) {
-            // Get the last order for the user
-            $order = $user->orders()->latest()->first();
-
-            if ($order) {
-                $lastPayment = $order->payments()->latest()->first();
-
-                if ($lastPayment) {
-                    $paymentStatus = $lastPayment->status;
-                } else {
-                    $paymentStatus = 'pending';
-                }
-
-                return response()->json([
-                    'status' => 'success',
-                    'user' => $user,
-                    'has_order' => $order !== null,
-                    'payment_status' => $paymentStatus,
-                ]);
-            } else {
-                // No orders for this user
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User has no orders',
-                ]);
-            }
-        } else {
+        if (!$user) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User is not authenticated',
             ], 401);
         }
+
+        $order = $user->orders()->latest()->first();
+        if ($order) {
+            $lastPayment = $order->payments()->latest()->first();
+
+            $paymentStatus = $lastPayment ? $lastPayment->status : 'pending';
+
+            return response()->json([
+                'status' => 'success',
+                'user' => $user,
+                'has_order' => true,
+                'payment_status' => $paymentStatus,
+            ]);
+        }
+
+        // No orders for this user
+        return response()->json([
+            'status' => 'error',
+            'message' => 'User has no orders',
+            'user'=>$user,
+            'has_order' => false,
+            'payment_status' => 'pending',
+        ]);
     }
 
 

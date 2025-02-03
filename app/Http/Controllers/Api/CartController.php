@@ -26,6 +26,8 @@ class CartController extends Controller
             $cart->items = $cart->items->map(function ($item) {
                 return [
                     'id' => $item->id,
+                    'image'=> $item->product->image,
+                    'quantity'=> $item->quantity,
                     'product_price' => $item->product ? $item->product->price : null,
                     'color_name' => $item->color ? $item->color->name : null,
                 ];
@@ -36,10 +38,9 @@ class CartController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'products' => 'required|array',
-            'products.*.product_id' => 'required|integer', 
-            'products.*.quantity' => 'required|integer',
-            'products.*.color_id' => 'required|integer',
+            'product_id' => 'required|integer',
+            'quantity' => 'required|integer',
+            'color_id' => 'required|integer',
         ]);
 
         // Get the authenticated user
@@ -60,18 +61,16 @@ class CartController extends Controller
         );
 
         // Loop through each product in the array and add or update the cart items
-        foreach ($request->products as $product) {
-            CartItems::updateOrCreate(
-                [
-                    'cart_id' => $cart->id,
-                    'card_id' => $product['product_id'], // Make sure the key is 'product_id' not 'card_id'
-                ],
-                [
-                    'quantity' => $product['quantity'],
-                    'color_id' => $product['color-id']
-                ]
-            );
-        }
+        CartItems::updateOrCreate(
+            [
+                'cart_id' => $cart->id,
+                'card_id' => $request['product_id'], // Make sure the key is 'product_id' not 'card_id'
+            ],
+            [
+                'quantity' => $request['quantity'],
+                'color_id' => $request['color_id']
+            ]
+        );
 
         // Return a success response
         return response()->json([
