@@ -163,8 +163,29 @@ class CheckoutController extends Controller
     }
 
 
-    public function success()
+    public function success(Request $request)
     {
+        // Get the session ID from Stripe
+        $sessionId = $request->get('session_id');
+        $orderId = $request->get('order');
+
+        // Find the payment based on the order ID
+        $payment = Payment::find($orderId);
+
+        if ($payment) {
+            // Set the payment status to completed
+            $payment->status = 'completed';
+            $payment->save();
+
+            // Clear the user's cart and cart items
+            $cart = Cart::where('user_id', auth()->id())->first();
+            if ($cart) {
+                CartItems::where('cart_id', $cart->id)->delete(); // Delete cart items
+                $cart->delete(); // Delete the cart itself
+            }
+        }
+
+        // Redirect to the frontend page after a successful purchase
         return redirect()->away(env('FRONTEND_URL'));
     }
 
