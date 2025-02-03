@@ -100,7 +100,6 @@ class CheckoutController extends Controller
 
             // Add product_id and quantity to metadata
             $metadata_items[] = [
-                'user_id'=> auth()->user()->id,
                 'product_id' => (string) $product->id,
                 'quantity' => (string) $item->quantity,
             ];
@@ -141,6 +140,7 @@ class CheckoutController extends Controller
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
                 'metadata' => [
+                    'user_id'=> auth()->user()->id,
                     'order_id' => (string) $payment->id,
                     'items' => json_encode($metadata_items),
                 ],
