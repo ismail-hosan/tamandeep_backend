@@ -100,7 +100,7 @@ class StripeController extends Controller
                                     $orderItem->qr_code = 'qrcodes/' . $qrCodeFileName;
                                     $orderItem->save();
                                 }
-                                $cartItems = Cart::where('user_id', $user)->with('itemss')->get();
+                                $cartItems = Cart::where('user_id', $user)->with('items')->get();
                                 foreach ($cartItems->items as $cartItem) {
                                     $cartItem->delete();  // Remove cart item from the cart
                                 }
