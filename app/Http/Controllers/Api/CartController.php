@@ -88,7 +88,7 @@ class CartController extends Controller
     public function quantity(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required|integer',
+            'item_id' => 'required|integer',
             'quantity' => 'required|integer',
         ]);
 
@@ -102,22 +102,12 @@ class CartController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
-        // Create or get the user's cart
-        $cart = Cart::firstOrCreate(
-            ['user_id' => $user->id],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
-        $cart_items = CartItems::updateOrCreate(
-            [
-                'cart_id' => $cart->id,
-                'card_id' => $request['product_id'], // Make sure the key is 'product_id' not 'card_id'
-            ],
-            [
-                'quantity' => $request['quantity'],
-            ]
-        );
-
+        $cart_items = CartItems::find($request->item_id);
+        if (!$cart_items) {
+            return $this->error([], 'Item not found in your cart.', 404);
+        }
+        $cart_items->quantity = $request->quantity;
+        $cart_items->save();
         return $this->success($cart_items, 'Quantity Changes Successfully!!', 200);
     }
 
@@ -134,17 +124,11 @@ class CartController extends Controller
                 'errors' => $validator->errors(),
             ], 400);
         }
-
-        $user = auth()->user();
-        $cart = Cart::firstOrCreate(
-            ['user_id' => $user->id],
-            ['created_at' => now(), 'updated_at' => now()]
-        );
         $cart_items = CartItems::find($request->item_id);
         if (!$cart_items) {
-            return $this->error([],'Item not found in your cart.',404);
+            return $this->error([], 'Item not found in your cart.', 404);
         }
         $cart_items->delete();
-        return $this->success([],'Item deleted from your cart.', 200);
+        return $this->success([], 'Item deleted from your cart.', 200);
     }
 }
