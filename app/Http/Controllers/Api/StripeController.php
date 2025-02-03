@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use Stripe\Stripe;
 use Stripe\Webhook;
 use App\Models\Payment;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Storage;
 
 
 class StripeController extends Controller
@@ -44,7 +49,7 @@ class StripeController extends Controller
             switch ($event->type) {
                 case 'checkout.session.completed':
                     $paymentIntent = $event->data->object; // Contains Stripe\PaymentIntent
-                    $payment = Payment::find($paymentIntent->metadata->order_id); 
+                    $payment = Payment::find($paymentIntent->metadata->order_id);
 
                     if ($payment) {
                         $payment->status = 'success';  // Update the payment status to 'success'
@@ -69,11 +74,29 @@ class StripeController extends Controller
                             if ($product) {
                                 // Create multiple order items based on the quantity
                                 for ($i = 0; $i < $item['quantity']; $i++) {
+                                    // Generate a unique ID for each order item
+                                    $uniqueId = Str::uuid();  // Use UUID to generate a unique ID for each order item
+
                                     // Save each order item to the order_items table
-                                    OrderItem::create([
-                                        'order_id' => $order->id,          // Link the order item to the created order
+                                    $orderItem = OrderItem::create([
+                                        'order_id' => $order->id,           // Link the order item to the created order
                                         'card_id' => $product->id,
+                                        'unique_id' => $uniqueId,         
                                     ]);
+
+                                    $encryptedUserId = Crypt::encryptString($orderItem->id);
+                                    $qrCodeUrl = route('user.view', ['id' => $encryptedUserId]);
+                                    $qrCode = new QrCode($qrCodeUrl);
+                                    $writer = new PngWriter();
+                                    $qrCodeImage = $writer->write($qrCode)->getString();
+
+                                    // Save QR code image
+                                    $qrCodeFileName = 'qr_code_' . $orderItem->id . '.png';
+                                    Storage::disk('public')->put('qrcodes/' . $qrCodeFileName, $qrCodeImage);
+
+                                    // Update the order_item with the QR code path
+                                    $orderItem->qr_code = 'qrcodes/' . $qrCodeFileName;
+                                    $orderItem->save();
                                 }
                             } else {
                                 // Log if the product is not found
