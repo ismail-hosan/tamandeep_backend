@@ -46,5 +46,10 @@ class User extends Authenticatable
         return $this->hasMany(Payment::class);
     }
 
+    public function cart()
+    {
+        return $this->belongsTo(Cart::class,'user_id');
+    }
+
 
 }

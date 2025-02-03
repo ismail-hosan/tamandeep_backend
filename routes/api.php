@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [CartController::class, 'index']);
         Route::post('/create', [CartController::class, 'store']);
         Route::post('/quantity', [CartController::class, 'quantity']);
+        Route::post('/delete', [CartController::class, 'delete']);
     });
 
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.create');
