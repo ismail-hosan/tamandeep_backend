@@ -168,8 +168,12 @@ class CheckoutController extends Controller
         $cart = Cart::where('user_id', auth()->id())->first();
 
         if ($cart) {
-            $cart->delete(); 
+            foreach ($cart->items as $item) {
+                $item->delete();  // Delete each item
+            }
+            $cart->delete();
         }
+
         return redirect()->away(env('FRONTEND_URL'));
     }
 
