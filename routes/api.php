@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\CMSController;
 use App\Http\Controllers\Api\QrcodeController;
 use App\Http\Controllers\Api\StripeController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/action/store', [ActionController::class, 'store']);
     Route::get('/action/show/{id}', [ActionController::class, 'show']);
     Route::get('/action/status/{id}', [ActionController::class, 'status']);
+
+    Route::get('/user/card', [UserController::class, 'index']);
 
 
 

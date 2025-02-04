@@ -166,14 +166,6 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        $cart = Cart::where('user_id', auth()->id())->first();
-        if ($cart) {
-            foreach ($cart->items as $item) {
-                $item->delete();  
-            }
-            $cart->delete();
-        }
-
         return redirect()->away(env('FRONTEND_URL'));
     }
 
