@@ -60,7 +60,6 @@ class UserController extends Controller
             return $this->error('Order item not found or you do not have permission to update this item.', 404);
         }
 
-        // Update all other order items' status to inactive (0), except the one with the given $id
         OrderItem::whereHas('order', function ($query) use ($auth) {
             $query->where('orders.user_id', $auth->id);
         })
@@ -76,18 +75,28 @@ class UserController extends Controller
     private function check($order_item_id)
     {
         $user = auth()->user();
+
         if (!$user) {
             return $this->error([], 'User not authenticated', 401);
         }
-        if (!$user->orders()->exists()) {
+        $orders = $user->orders;
+
+        if ($orders->isEmpty()) {
             return $this->error([], 'Order not found for this user', 404); // 404 Not Found
         }
-        $order = $user->orders()->first();
-        $orderItem = $order->items()->where('id', $order_item_id)->first();
+        $orderItem = null;
+        foreach ($orders as $order) {
+            $orderItem = $order->items()->where('id', $order_item_id)->first();
+            if ($orderItem) {
+                break; 
+            }
+        }
 
         if (!$orderItem) {
             return $this->error([], 'Order item not found or does not belong to this user\'s order', 404); // 404 Not Found
         }
+
         return null;
     }
+
 }
