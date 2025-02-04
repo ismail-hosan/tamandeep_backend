@@ -18,9 +18,10 @@ class UserController extends Controller
         $orderItems = OrderItem::whereHas('order', function ($query) use ($auth) {
             $query->where('user_id', $auth->id);
         })
-            ->join('orders', 'orders.id', '=', 'order_items.order_id')  
-            ->orderBy('order_items.created_at', 'DESC')  
-            ->select('order_items.*')  
+            ->join('orders', 'orders.id', '=', 'order_items.order_id')
+            ->join('cards', 'cards.id', '=', 'order_items.card_id')  // Join with the cards table
+            ->orderBy('order_items.created_at', 'DESC')
+            ->select('order_items.*', 'cards.name as card_name')  // Select card name as card_name
             ->get();
 
         return $this->success($orderItems, 'Data fetched successfully!', 200);
