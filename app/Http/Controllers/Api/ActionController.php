@@ -30,85 +30,63 @@ class ActionController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Check validation failure
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
+        // Check if order item exists
         $res = $this->check($request->order_item_id);
         if ($res) {
             return $res;
         }
+        $orderItemExists = OrderItem::find($request->order_item_id); // Example check
+        if (!$orderItemExists) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Order item does not exist.',
+            ], 404);
+        }
+
         $type = $request->input('type');
         $productType = Product_Type::firstOrCreate(
             ['order_item_id' => $request->order_item_id, 'name' => $type]
         );
 
-        $dataToStore = $request->except(['type', 'image', 'cover_image']);
+        $dataToStore = $request->except(['order_item_id','type', 'image', 'cover_image']);
 
-        $imagePath = null;
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public');
-            $dataToStore['image'] = $imagePath;
+        // Handle image file uploads (image and cover image)
+        $fileFields = ['image', 'cover_image'];
+        foreach ($fileFields as $fileField) {
+            if ($request->hasFile($fileField)) {
+                $filePath = $request->file($fileField)->store(($fileField === 'image') ? 'images' : 'cover_images', 'public');
+                $dataToStore[$fileField] = $filePath;
+            }
         }
 
-        $coverImagePath = null;
-        if ($request->hasFile('cover_image')) {
-            $coverImagePath = $request->file('cover_image')->store('cover_images', 'public');
-            $dataToStore['cover_image'] = $coverImagePath;
-        }
-
+        // Attempt to store the data
         try {
             $dataEntry = Data::create([
                 'category_id' => $productType->id,
-                'data' => json_encode($dataToStore)
+                'data' => json_encode($dataToStore),
             ]);
-
-            $existingQrCode = UserQrcode::where('order_item_id', $request->order_item_id)->first();
-
-            if ($existingQrCode) {
-                return response()->json([
-                    'status' => 'success',
-                    'product_type' => $productType,
-                    'data' => $dataEntry,
-                    'qr_code_url' => asset('storage/' . $existingQrCode->file_path),
-                    'qr_code_entry' => $existingQrCode
-                ]);
-            }
-
-            $encryptedUserId = Crypt::encryptString($request->order_item_id);
-            $qrCodeUrl = route('user.view', ['id' => $encryptedUserId]);
-            $qrCode = new QrCode($qrCodeUrl);
-            $writer = new PngWriter();
-            $qrCodeImage = $writer->write($qrCode)->getString();
-
-            // Save QR code image
-            $qrCodeFileName = 'qr_code_' . $request->order_item_id . '.png';
-            Storage::disk('public')->put('qrcodes/' . $qrCodeFileName, $qrCodeImage);
-
-            // Save QR code entry
-            $qrCodeEntry = UserQrcode::create([
-                'order_item_id' => $request->order_item_id,
-                'file_path' => 'qrcodes/' . $qrCodeFileName,
-            ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) { // Catch any exception, including fatal ones
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while storing data or generating QR code',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
 
+        // Return success response with stored data
         return response()->json([
             'status' => 'success',
             'product_type' => $productType,
             'data' => $dataEntry,
-            'qr_code_url' => $qrCodeFileName,
-            'image_path' => $imagePath ? asset('storage/' . $imagePath) : null,
-            'cover_image_path' => $coverImagePath ? asset('storage/' . $coverImagePath) : null
         ]);
     }
 
@@ -119,7 +97,6 @@ class ActionController extends Controller
             return $res;
         }
         $data = OrderItem::with(['product.data', 'qrcodes'])->find($id);
-        // $data = User::with(['productTypes.data', 'qrcodes'])->find(Auth::user()->id);
 
         // Check if user exists
         if (!$data) {
@@ -197,10 +174,10 @@ class ActionController extends Controller
         if (!$user) {
             return $this->error([], 'User not authenticated', 401);
         }
-        if (!$user->order()->exists()) {
+        if (!$user->orders()->exists()) {
             return $this->error([], 'Order not found for this user', 404); // 404 Not Found
         }
-        $order = $user->order()->first();
+        $order = $user->orders()->first();
         $orderItem = $order->items()->where('id', $order_item_id)->first();
 
         if (!$orderItem) {
