@@ -32,7 +32,7 @@ class UserController extends Controller
     public function status(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'item_id' => 'required|string'
+            'item_id' => 'required|integer'
         ]);
 
         if ($validator->fails()) {
