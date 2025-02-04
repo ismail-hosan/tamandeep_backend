@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->boolean('status')->nullable();
+            $table->boolean('status')->default(0);
         });
     }
 

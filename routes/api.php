@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/action/status/{id}', [ActionController::class, 'status']);
 
     Route::get('/user/card', [UserController::class, 'index']);
+    Route::post('/user/card/status', [UserController::class, 'status']);
 
 
 
