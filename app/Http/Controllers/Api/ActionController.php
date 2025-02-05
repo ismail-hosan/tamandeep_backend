@@ -57,7 +57,7 @@ class ActionController extends Controller
             ['order_item_id' => $request->order_item_id, 'name' => $type]
         );
 
-        $dataToStore = $request->except(['order_item_id','type', 'image', 'cover_image']);
+        $dataToStore = $request->except(['order_item_id', 'type', 'image', 'cover_image']);
 
         // Handle image file uploads (image and cover image)
         $fileFields = ['image', 'cover_image'];
@@ -130,6 +130,95 @@ class ActionController extends Controller
         // ]);
         return $this->success($responseData, 'Data Fatch success', 200);
     }
+
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'data_id' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Check validation failure
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        $dataEntry = Data::find($request->data_id);
+
+        if (!$dataEntry) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Data not found for the provided data_id.',
+            ], 404);
+        }
+        $dataToStore = $request->except(['data_id', 'image', 'cover_image']);
+
+        $fileFields = ['image', 'cover_image'];
+        foreach ($fileFields as $fileField) {
+            if ($request->hasFile($fileField)) {
+                // Validate the file before proceeding (to ensure it's an image)
+                $file = $request->file($fileField);
+
+                // You can add a check here if you want to restrict specific file types or sizes, for example
+                if (!$file->isValid()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => "The {$fileField} file is invalid.",
+                    ], 422);
+                }
+
+                // Store the file and save the path
+                $filePath = $file->store(($fileField === 'image') ? 'images' : 'cover_images', 'public');
+                $dataToStore[$fileField] = $filePath;
+            }
+        }
+
+        try {
+            // Update the existing Data entry with new data
+            $dataEntry->data = json_encode($dataToStore);
+            $dataEntry->save();  // Save the updated data
+
+        } catch (\Throwable $e) { // Catch any exception during database update
+            return response()->json([
+                'status' => 'error',
+                'message' => 'An error occurred while updating data.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+
+        // Return success response with updated data
+        return response()->json([
+            'status' => 'success',
+            'data' => $dataEntry,
+        ]);
+    }
+
+
+    public function delete(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'data_id' => 'required|string',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        $dataEntry = Data::find($request->data_id);
+
+        if (!$dataEntry) {
+            return $this->error([], 'Data not found for the provided data_id.', 500);
+        }
+        $dataEntry->delete();
+        return $this->success([], 'Data Deleted Successfully!', 200);
+    }
+
 
     public function status($id)
     {

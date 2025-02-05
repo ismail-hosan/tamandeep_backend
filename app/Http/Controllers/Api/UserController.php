@@ -21,7 +21,6 @@ class UserController extends Controller
         })
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->join('cards', 'cards.id', '=', 'order_items.card_id')  // Join with the cards table
-            ->orderBy('order_items.created_at', 'DESC')
             ->select('order_items.*', 'cards.name as card_name')  // Select card name as card_name
             ->get();
 
