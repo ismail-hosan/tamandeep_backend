@@ -220,21 +220,29 @@ class ActionController extends Controller
     }
 
 
-    public function status($id)
+    public function status(Request $request)
     {
-        $auth = Auth::user();
+        $validator = Validator::make($request->all(), [
+            'order_item_id' => 'required|integer',
+            'data_id' => 'required|integer',
+        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
-        // Retrieve all product types for the authenticated user along with their related data
-        $check = Product_Type::where('order_item_id', $auth->id)
+        $check = Product_Type::where('order_item_id', $request->order_item_id)
             ->with('data')
             ->get();
 
-        // Check if the user has any product types with data
         if ($check->isEmpty() || $check->pluck('data')->flatten()->isEmpty()) {
             return $this->error([], 'User is not authenticated or no product type found', 401);
         }
 
-        $data = Data::find($id);
+        $data = Data::find($request->data_id);
         if (!$data) {
             return response()->json([
                 'status' => 'error',
@@ -242,11 +250,10 @@ class ActionController extends Controller
             ], 404);
         }
 
-        // Iterate over all product types and their related data to deactivate other data
         foreach ($check as $productType) {
             foreach ($productType->data as $relatedData) {
-                if ($relatedData->id !== $id) {
-                    $relatedData->active = 0; // Set other data records as inactive
+                if ($relatedData->id !== $request->data_id) {
+                    $relatedData->active = 0;
                     $relatedData->save();
                 }
             }
