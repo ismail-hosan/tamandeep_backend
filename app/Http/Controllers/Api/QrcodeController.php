@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Encryption\DecryptException;
 
@@ -20,50 +21,45 @@ class QrcodeController extends Controller
     {
         try {
             // Fetch the data for the given code, including related productTypes and data, where both are active
-            $data = OrderItem::with([
-                'productTypes' => function ($query) {
-                    // Fetch only productTypes that have at least one active data
-                    $query->whereHas('data', function ($query) {
-                        $query->where('active', 1); // Ensure 'data' is active
-                    });
-                }
-            ])
-                ->where('unique_code', $code)
-                ->first(); // Fetch the first matching order item
+            $data = DB::table('order_items')
+                ->select('order_items.*') // Select order_item fields
+                ->join('product_types', 'order_items.product_type_id', '=', 'product_types.id') // Adjust with your actual foreign key
+                ->join('data', 'product_types.id', '=', 'data.product_type_id') // Join with 'data' table
+                ->where('order_items.unique_code', $code)
+                ->where('data.active', 1) // Ensure 'data' is active
+                ->groupBy('order_items.id') // Ensure to group by the order item
+                ->first();
 
+            // Fetch productTypes along with their associated data
+            $productTypes = DB::table('product_types')
+                ->whereIn('product_types.id', function ($query) use ($code) {
+                    $query->select('product_types.id')
+                        ->from('order_items')
+                        ->join('data', 'product_types.id', '=', 'data.product_type_id')
+                        ->where('order_items.unique_code', $code)
+                        ->where('data.active', 1);
+                })
+                ->get();
 
-            // Check if data exists
-            if (!$data) {
-                return view('error', ['message' => 'Order item not found or inactive']);
+            // To structure your data as per your need:
+            $dataArray = [];
+            foreach ($productTypes as $productType) {
+                $productTypeData = DB::table('data')
+                    ->where('product_type_id', $productType->id)
+                    ->where('active', 1) // Active data only
+                    ->get()
+                    ->toArray(); // Convert to array
+
+                $dataArray[] = [
+                    'productType' => $productType,
+                    'data' => $productTypeData
+                ];
             }
-
-            // Prepare the response data for one product type with its active data entries
-            $responseData = [
-                'product_type' => $data->productTypes->map(function ($productType) {
-                    // Check if productType itself is active
-                    if ($productType->active) {
-                        return [
-                            'id' => $productType->id,
-                            'name' => $productType->name,
-                            'data' => $productType->data->map(function ($dataEntry) {
-                                // Only include active data entries
-                                if ($dataEntry->active) {
-                                    return [
-                                        'id' => $dataEntry->id,
-                                        'category_id' => $dataEntry->category_id,
-                                        'data' => json_decode($dataEntry->data) // Decoding JSON data
-                                    ];
-                                }
-                            })->filter() // Remove null values if any dataEntry is inactive
-                        ];
-                    }
-                })->first() // Fetch only the first productType
-            ];
 
             // Return success response with filtered active data
             return response()->json([
                 'message' => 'Data fetch success',
-                'data' => $responseData
+                'data' => $dataArray
             ], 200);
 
         } catch (\Exception $e) {
