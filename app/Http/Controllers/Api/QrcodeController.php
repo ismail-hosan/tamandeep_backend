@@ -30,29 +30,22 @@ class QrcodeController extends Controller
             if (!$data) {
                 return view('error', ['message' => 'Order item not found or inactive']);
             }
-            dd($data);
 
             // Prepare the response data for product types and their active data entries
             $responseData = [
                 'product_types' => $data->productTypes->map(function ($productType) {
-                    // Check if productType itself is active
-                    if ($productType->active) {
-                        return [
-                            'id' => $productType->id,
-                            'name' => $productType->name,
-                            'data' => $productType->data->map(function ($dataEntry) {
-                                // Only include active data entries
-                                if ($dataEntry->active) {
-                                    return [
-                                        'id' => $dataEntry->id,
-                                        'category_id' => $dataEntry->category_id,
-                                        'data' => json_decode($dataEntry->data) // Decoding JSON data
-                                    ];
-                                }
-                            })->filter() // Remove null values if any dataEntry is inactive
-                        ];
-                    }
-                })->filter() // Remove null values if any productType is inactive
+                    return [
+                        'id' => $productType->id,
+                        'name' => $productType->name,
+                        'data' => $productType->data->map(function ($dataEntry) {
+                            return [
+                                'id' => $dataEntry->id,
+                                'category_id' => $dataEntry->category_id,
+                                'data' => json_decode($dataEntry->data) // Decoding JSON data
+                            ];
+                        })
+                    ];
+                })
             ];
 
             // Return success response with filtered active data
