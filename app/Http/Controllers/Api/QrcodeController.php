@@ -26,7 +26,7 @@ class QrcodeController extends Controller
             ])
                 ->where('unique_code', $code)
                 ->first();
-
+dd($data);
             // Check if data exists
             if (!$data) {
                 return view('error', ['message' => 'Order item not found or inactive']);
@@ -36,7 +36,7 @@ class QrcodeController extends Controller
             $responseData = new \stdClass(); // Create a new object for the response
 
             $responseData->product_types = $data->productTypes->filter(function ($productType) {
-                $productType->data->isNotEmpty();
+                return $productType->data->isNotEmpty();
             })->map(function ($productType) {
                 $productTypeObj = new \stdClass();
                 $productTypeObj->name = $productType->name;
@@ -51,6 +51,7 @@ class QrcodeController extends Controller
 
                 return $productTypeObj;
             });
+
 
             return $this->success($responseData,'Data fetch successfully!',200);
 
