@@ -36,7 +36,7 @@ class QrcodeController extends Controller
             $responseData = new \stdClass(); // Create a new object for the response
 
             $responseData->product_types = $data->productTypes->filter(function ($productType) {
-                return $productType->data->isNotEmpty();
+                $productType->data->isNotEmpty();
             })->map(function ($productType) {
                 $productTypeObj = new \stdClass();
                 $productTypeObj->name = $productType->name;
@@ -52,11 +52,7 @@ class QrcodeController extends Controller
                 return $productTypeObj;
             });
 
-            // Return success response with filtered active data
-            return response()->json([
-                'message' => 'Data fetch success',
-                'data' => $responseData
-            ], 200);
+            return $this->success($responseData,'Data fetch successfully!',200);
 
         } catch (\Exception $e) {
             // Handle unexpected errors
