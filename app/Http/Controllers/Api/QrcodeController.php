@@ -33,23 +33,24 @@ class QrcodeController extends Controller
             }
 
             // Prepare the response data for product types and their active data entries
-            $responseData = [
-                'product_types' => $data->productTypes->filter(function ($productType) {
-                    // Only include productTypes that have at least one active data entry
-                    return $productType->data->isNotEmpty();
-                })->map(function ($productType) {
-                    return [
-                        'name' => $productType->name,
-                        'data' => $productType->data->map(function ($dataEntry) {
-                            return [
-                                'id' => $dataEntry->id,
-                                'category_id' => $dataEntry->category_id,
-                                'data' => json_decode($dataEntry->data) // Decoding JSON data
-                            ];
-                        })
-                    ];
-                })
-            ];
+            $responseData = new \stdClass(); // Create a new object for the response
+
+            $responseData->product_types = $data->productTypes->filter(function ($productType) {
+                return $productType->data->isNotEmpty();
+            })->map(function ($productType) {
+                $productTypeObj = new \stdClass();
+                $productTypeObj->name = $productType->name;
+
+                $productTypeObj->data = $productType->data->map(function ($dataEntry) {
+                    $dataEntryObj = new \stdClass();
+                    $dataEntryObj->id = $dataEntry->id;
+                    $dataEntryObj->category_id = $dataEntry->category_id;
+                    $dataEntryObj->data = json_decode($dataEntry->data); 
+                    return $dataEntryObj; 
+                });
+
+                return $productTypeObj;
+            });
 
             // Return success response with filtered active data
             return response()->json([
