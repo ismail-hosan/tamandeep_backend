@@ -19,7 +19,7 @@ class QrcodeController extends Controller
     {
         $data = OrderItem::with([
             'productTypes.data' => function ($query) {
-                $query->where('active', true); // Filter only active data entries
+                $query->where('active', 1); // Filter only active data entries
             }
         ])->where('unique_code', $code)->first();
 
