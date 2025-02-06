@@ -63,14 +63,7 @@ class QrcodeController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            // Handle unexpected errors and return a view or json response
-            // Option 1: Return error view with message
-            return view('error', ['message' => 'An error occurred: ' . $e->getMessage()]);
-
-            // Option 2: Return JSON response (if your API returns JSON)
-            // return response()->json([
-            //     'message' => 'An error occurred: ' . $e->getMessage(),
-            // ], 500);
+            dd($e->getMessage());
         }
     }
 
