@@ -20,52 +20,54 @@ class QrcodeController extends Controller
     public function view($code)
     {
         try {
-            // Fetch the data for the given code, including related productTypes and data, where both are active
-            $data = DB::table('order_items')
-                ->select('order_items.*') // Select order_item fields
-                ->join('product_types', 'order_items.product_type_id', '=', 'product_types.id') // Adjust with your actual foreign key
-                ->join('data', 'product_types.id', '=', 'data.product_type_id') // Join with 'data' table
+            // Fetch the order item with the matching unique_code
+            $orderItem = DB::table('order_items')
+                ->select('order_items.*') // Select order item fields
                 ->where('order_items.unique_code', $code)
-                ->where('data.active', 1) // Ensure 'data' is active
-                ->groupBy('order_items.id') // Ensure to group by the order item
-                ->first();
+                ->first(); // Get the first matching order item
 
-            // Fetch productTypes along with their associated data
-            $productTypes = DB::table('product_types')
-                ->whereIn('product_types.id', function ($query) use ($code) {
-                    $query->select('product_types.id')
-                        ->from('order_items')
-                        ->join('data', 'product_types.id', '=', 'data.product_type_id')
-                        ->where('order_items.unique_code', $code)
-                        ->where('data.active', 1);
-                })
-                ->get();
-
-            // To structure your data as per your need:
-            $dataArray = [];
-            foreach ($productTypes as $productType) {
-                $productTypeData = DB::table('data')
-                    ->where('product_type_id', $productType->id)
-                    ->where('active', 1) // Active data only
-                    ->get()
-                    ->toArray(); // Convert to array
-
-                $dataArray[] = [
-                    'productType' => $productType,
-                    'data' => $productTypeData
-                ];
+            if (!$orderItem) {
+                return response()->json([
+                    'message' => 'Order item not found',
+                ], 404);
             }
 
-            // Return success response with filtered active data
+            // Now fetch the related product_type for the order item
+            $productType = DB::table('product_types')
+                ->where('product_types.id', $orderItem->product_type_id)
+                ->first(); // Fetch the matching product type
+
+            if (!$productType) {
+                return response()->json([
+                    'message' => 'Product type not found',
+                ], 404);
+            }
+
+            // Fetch the active data related to the product type
+            $data = DB::table('data')
+                ->where('data.category_id', $productType->id) // category_id links to product_type_id
+                ->where('data.active', 1) // Only active data
+                ->get(); // Fetch the data entries
+
+            // Convert data to array
+            $dataArray = $data->toArray();
+
+            // Return success response with the structure
             return response()->json([
-                'message' => 'Data fetch success',
-                'data' => $dataArray
+                'message' => 'Data fetched successfully',
+                'order_item' => $orderItem,
+                'product_type' => $productType,
+                'data' => $dataArray,
             ], 200);
 
         } catch (\Exception $e) {
-            dd($e->getMessage());
+            // Handle unexpected errors
+            return response()->json([
+                'message' => 'An error occurred: ' . $e->getMessage(),
+            ], 500);
         }
     }
+
 
 
 
