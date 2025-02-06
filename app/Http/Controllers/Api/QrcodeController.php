@@ -39,7 +39,6 @@ class QrcodeController extends Controller
                     return $productType->data->isNotEmpty();
                 })->map(function ($productType) {
                     return [
-                        'id' => $productType->id,
                         'name' => $productType->name,
                         'data' => $productType->data->map(function ($dataEntry) {
                             return [
