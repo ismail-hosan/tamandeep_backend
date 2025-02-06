@@ -17,43 +17,55 @@ class QrcodeController extends Controller
     use apiresponse;
     public function view($code)
     {
-        $data = OrderItem::with([
-            'productTypes.data' => function ($query) {
-                $query->where('active', 1); // Filter only active data entries
-            }
-        ])->where('unique_code', $code)->first();
-
         try {
-            // Fetch user with active productTypes data and qrcodes
-           
+            // Fetch the data for the given code, including related productTypes and data, where both are active
+            $data = OrderItem::with([
+                'productTypes.data' => function ($query) {
+                    // Ensure you're only selecting active data entries
+                    $query->where('active', 1);
+                }
+            ])
+                ->where('unique_code', $code)
+                ->first();
 
-            // Check if user exists
+            // Check if data exists
             if (!$data) {
-                return view('error', ['message' => 'User not found']);
+                return view('error', ['message' => 'Order item not found or inactive']);
             }
 
-            // Prepare the response data
+            // Prepare the response data for product types and their active data entries
             $responseData = [
                 'product_types' => $data->productTypes->map(function ($productType) {
-                    return [
-                        'id' => $productType->id,
-                        'name' => $productType->name,
-                        'data' => $productType->data->map(function ($dataEntry) {
-                            return [
-                                'id' => $dataEntry->id,
-                                'category_id' => $dataEntry->category_id,
-                                'data' => json_decode($dataEntry->data) // Decoding JSON data
-                            ];
-                        })
-                    ];
-                })
+                    // Check if productType itself is active
+                    if ($productType->active) {
+                        return [
+                            'id' => $productType->id,
+                            'name' => $productType->name,
+                            'data' => $productType->data->map(function ($dataEntry) {
+                                // Only include active data entries
+                                if ($dataEntry->active) {
+                                    return [
+                                        'id' => $dataEntry->id,
+                                        'category_id' => $dataEntry->category_id,
+                                        'data' => json_decode($dataEntry->data) // Decoding JSON data
+                                    ];
+                                }
+                            })->filter() // Remove null values if any dataEntry is inactive
+                        ];
+                    }
+                })->filter() // Remove null values if any productType is inactive
             ];
 
-            return $this->success($responseData,'data fatch success',200);
+            // Return success response with filtered active data
+            return response()->json([
+                'message' => 'Data fetch success',
+                'data' => $responseData
+            ], 200);
 
-        } catch (DecryptException $e) {
-            // Handle decryption failure
-            return view('error', ['message' => 'Invalid user ID']);
+        } catch (\Exception $e) {
+            // Handle unexpected errors
+            return view('error', ['message' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
+
 }
