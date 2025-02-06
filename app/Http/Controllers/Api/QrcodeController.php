@@ -15,29 +15,31 @@ use Illuminate\Contracts\Encryption\DecryptException;
 class QrcodeController extends Controller
 {
     use apiresponse;
+
     public function view($code)
     {
         try {
             // Fetch the data for the given code, including related productTypes and data, where both are active
             $data = OrderItem::with([
                 'productTypes' => function ($query) {
+                    // Fetch only productTypes that have at least one active data
                     $query->whereHas('data', function ($query) {
-                        $query->where('active', 1); // Make sure 'data' is active
+                        $query->where('active', 1); // Ensure 'data' is active
                     });
                 }
             ])
                 ->where('unique_code', $code)
-                ->first();
+                ->first(); // Fetch the first matching order item
 
-            dd($data);
+
             // Check if data exists
             if (!$data) {
                 return view('error', ['message' => 'Order item not found or inactive']);
             }
 
-            // Prepare the response data for product types and their active data entries
+            // Prepare the response data for one product type with its active data entries
             $responseData = [
-                'product_types' => $data->productTypes->map(function ($productType) {
+                'product_type' => $data->productTypes->map(function ($productType) {
                     // Check if productType itself is active
                     if ($productType->active) {
                         return [
@@ -55,7 +57,7 @@ class QrcodeController extends Controller
                             })->filter() // Remove null values if any dataEntry is inactive
                         ];
                     }
-                })->filter() // Remove null values if any productType is inactive
+                })->first() // Fetch only the first productType
             ];
 
             // Return success response with filtered active data
@@ -69,5 +71,6 @@ class QrcodeController extends Controller
             return view('error', ['message' => 'An error occurred: ' . $e->getMessage()]);
         }
     }
+
 
 }
