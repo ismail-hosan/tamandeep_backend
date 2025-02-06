@@ -18,10 +18,10 @@ class QrcodeController extends Controller
     public function view($code)
     {
         try {
-            // Fetch the data for the given code, including related productTypes and their active data, where both are active
+            // Fetch the data for the given code, including related productTypes and data, where both are active
             $data = OrderItem::with([
                 'productTypes.data' => function ($query) {
-                    $query->where('active', '1'); // Filter data to only active ones
+                    $query->where('active', 1)->first();
                 }
             ])
                 ->where('unique_code', $code)
@@ -33,27 +33,33 @@ dd($data);
             }
 
             // Prepare the response data for product types and their active data entries
-            $responseData = new \stdClass(); // Create a new object for the response
+            $responseData = [
+                'product_types' => $data->productTypes->map(function ($productType) {
+                    // Check if productType itself is active
+                    if ($productType->active) {
+                        return [
+                            'id' => $productType->id,
+                            'name' => $productType->name,
+                            'data' => $productType->data->map(function ($dataEntry) {
+                                // Only include active data entries
+                                if ($dataEntry->active) {
+                                    return [
+                                        'id' => $dataEntry->id,
+                                        'category_id' => $dataEntry->category_id,
+                                        'data' => json_decode($dataEntry->data) // Decoding JSON data
+                                    ];
+                                }
+                            })->filter() // Remove null values if any dataEntry is inactive
+                        ];
+                    }
+                })->filter() // Remove null values if any productType is inactive
+            ];
 
-            $responseData->product_types = $data->productTypes->filter(function ($productType) {
-                return $productType->data->isNotEmpty();
-            })->map(function ($productType) {
-                $productTypeObj = new \stdClass();
-                $productTypeObj->name = $productType->name;
-
-                $productTypeObj->data = $productType->data->map(function ($dataEntry) {
-                    $dataEntryObj = new \stdClass();
-                    $dataEntryObj->id = $dataEntry->id;
-                    $dataEntryObj->category_id = $dataEntry->category_id;
-                    $dataEntryObj->data = json_decode($dataEntry->data); 
-                    return $dataEntryObj; 
-                });
-
-                return $productTypeObj;
-            });
-
-
-            return $this->success($responseData,'Data fetch successfully!',200);
+            // Return success response with filtered active data
+            return response()->json([
+                'message' => 'Data fetch success',
+                'data' => $responseData
+            ], 200);
 
         } catch (\Exception $e) {
             // Handle unexpected errors
