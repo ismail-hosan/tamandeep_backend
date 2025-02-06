@@ -25,4 +25,8 @@ class OrderItem extends Model
     {
         return $this->hasOne(UserQrcode::class);
     }
+    public function productTypes()
+    {
+        return $this->hasMany(Product_Type::class, 'order_item_id');
+    }
 }

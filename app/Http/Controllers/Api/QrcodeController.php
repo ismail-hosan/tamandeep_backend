@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\OrderItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -12,19 +13,16 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class QrcodeController extends Controller
 {
-    public function view($id)
+    public function view($code)
     {
-        try {
-            // Decrypt the encrypted user ID
-            $decryptedData = Crypt::decryptString($id);
 
+        try {
             // Fetch user with active productTypes data and qrcodes
-            $data = User::with([
+            $data = OrderItem::with([
                 'productTypes.data' => function ($query) {
                     $query->where('active', true); // Filter only active data entries
-                },
-                'qrcodes'
-            ])->find($decryptedData);
+                }
+            ])->where('unique_code', $code);
 
             // Check if user exists
             if (!$data) {

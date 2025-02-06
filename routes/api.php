@@ -66,5 +66,5 @@ Route::prefix('card')->group(function () {
     Route::get('/', [CardController::class, 'index']);
 });
 
-Route::get('/user/view/{id}', [QrcodeController::class, 'view'])->name('user.view');
+Route::get('/user/view/{code}', [QrcodeController::class, 'view'])->name('user.view');
 Route::post('stripe/webhook', [StripeController::class, 'handle']);
