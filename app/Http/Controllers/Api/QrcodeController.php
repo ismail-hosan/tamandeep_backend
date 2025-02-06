@@ -18,14 +18,15 @@ class QrcodeController extends Controller
     public function view($code)
     {
         try {
-            // Fetch the data for the given code, including related productTypes and data, where both are active
+            // Fetch the data for the given code, including related productTypes and their active data, where both are active
             $data = OrderItem::with([
                 'productTypes.data' => function ($query) {
-                    $query->where('active', '1');
+                    $query->where('active', '1'); // Filter data to only active ones
                 }
             ])
                 ->where('unique_code', $code)
                 ->first();
+
             // Check if data exists
             if (!$data) {
                 return view('error', ['message' => 'Order item not found or inactive']);
@@ -33,7 +34,10 @@ class QrcodeController extends Controller
 
             // Prepare the response data for product types and their active data entries
             $responseData = [
-                'product_types' => $data->productTypes->map(function ($productType) {
+                'product_types' => $data->productTypes->filter(function ($productType) {
+                    // Only include productTypes that have at least one active data entry
+                    return $productType->data->isNotEmpty();
+                })->map(function ($productType) {
                     return [
                         'id' => $productType->id,
                         'name' => $productType->name,
