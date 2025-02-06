@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\OrderItem;
 use App\Models\User;
+use App\Traits\apiresponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -13,16 +14,18 @@ use Illuminate\Contracts\Encryption\DecryptException;
 
 class QrcodeController extends Controller
 {
+    use apiresponse;
     public function view($code)
     {
+        $data = OrderItem::with([
+            'productTypes.data' => function ($query) {
+                $query->where('active', true); // Filter only active data entries
+            }
+        ])->where('unique_code', $code)->first();
 
         try {
             // Fetch user with active productTypes data and qrcodes
-            $data = OrderItem::with([
-                'productTypes.data' => function ($query) {
-                    $query->where('active', true); // Filter only active data entries
-                }
-            ])->where('unique_code', $code);
+           
 
             // Check if user exists
             if (!$data) {
@@ -31,7 +34,6 @@ class QrcodeController extends Controller
 
             // Prepare the response data
             $responseData = [
-                'user' => $data->only(['id', 'name', 'email']),
                 'product_types' => $data->productTypes->map(function ($productType) {
                     return [
                         'id' => $productType->id,
@@ -47,7 +49,7 @@ class QrcodeController extends Controller
                 })
             ];
 
-            return view('view', ['data' => $responseData]);
+            return $this->success($responseData,'data fatch success',200);
 
         } catch (DecryptException $e) {
             // Handle decryption failure

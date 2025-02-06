@@ -86,7 +86,7 @@ class StripeController extends Controller
                                         'unique_code' => $uniqueId,
                                     ]);
 
-                                    $qrCodeUrl = 'http://localhost:5173?code=' . $orderItem->unique_code;  // URL with the unique_code parameter
+                                    $qrCodeUrl = 'http://localhost:5173/' . $orderItem->unique_code;  // URL with the unique_code parameter
                                     $qrCode = new QrCode($qrCodeUrl);
                                     $writer = new PngWriter();
                                     $qrCodeImage = $writer->write($qrCode)->getString();
