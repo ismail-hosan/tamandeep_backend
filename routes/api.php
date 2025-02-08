@@ -21,6 +21,11 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Cms Route
 Route::post('/cms', [CMSController::class, 'index']);
+Route::get('/cms/feature', [CMSController::class, 'feature']);
+Route::get('cms/review', [CMSController::class, 'review']);
+Route::get('cms/brand', [CMSController::class, 'brand']);
+
+
 
 Route::post('forget/password', [AuthController::class, 'forgetPassword']);
 Route::post('/verify/otp', [AuthController::class, 'checkotp']);
@@ -66,6 +71,8 @@ Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('che
 Route::prefix('card')->group(function () {
     Route::get('/', [CardController::class, 'index']);
 });
+
+// CMS Route
 
 Route::get('/action/view/{code}', [QrcodeController::class, 'view'])->name('user.view');
 Route::post('stripe/webhook', [StripeController::class, 'handle']);

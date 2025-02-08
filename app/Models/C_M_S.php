@@ -9,4 +9,9 @@ class C_M_S extends Model
 {
     use HasFactory;
     protected $guarded = [];
+
+    public function getImageAttribute($value)
+    {
+        return $value ? url($value) : null;
+    }
 }

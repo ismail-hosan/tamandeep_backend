@@ -68,7 +68,7 @@
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">CMS</span></li>
         <!-- CMS -->
-        <li class="menu-item">
+        <li class="menu-item {{ Request::routeIs('features.index') || Request::routeIs('review.index')   ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div data-i18n="Layouts">CMS</div>
@@ -80,14 +80,14 @@
                 </li>
             </ul>
             <ul class="menu-sub">
-                <li class="menu-item">
+                <li class="menu-item {{ Request::routeIs('features.*') ? 'active' : '' }}">
                     <a class="menu-link" href="{{ route('features.index') }}">Features</a>
                 </li>
             </ul>
 
             {{-- Review --}}
             <ul class="menu-sub">
-                <li class="menu-item">
+                <li class="menu-item {{Request::routeIs('review.*') ? 'active' : ''}}">
                     <a class="menu-link" href="{{ route('review.index') }}">Reviews</a>
                 </li>
             </ul>

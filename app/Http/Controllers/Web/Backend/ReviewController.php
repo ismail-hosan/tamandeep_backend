@@ -40,7 +40,7 @@ class ReviewController extends Controller
                 ->addColumn('status', function ($data) {
                     $status = ' <div class="form-check form-switch" style="margin-left:40px;">';
                     $status .= ' <input onclick="showStatusChangeAlert(' . $data->id . ')" type="checkbox" class="form-check-input" id="customSwitch' . $data->id . '" getAreaid="' . $data->id . '" name="status"';
-                    if ($data->status == "active") {
+                    if ($data->status == "Active") {
                         $status .= "checked";
                     }
                     $status .= '><label for="customSwitch' . $data->id . '" class="form-check-label" for="customSwitch"></label></div>';
@@ -74,8 +74,9 @@ class ReviewController extends Controller
             'user_id' => 'required|exists:users,id',
             'title' => 'required|max:255',
             'description' => 'required',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
+
 
         try {
 
@@ -124,7 +125,7 @@ class ReviewController extends Controller
             'user_id' => 'required|exists:users,id',
             'title' => 'required|max:255',
             'description' => 'required',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         try {
@@ -162,9 +163,9 @@ class ReviewController extends Controller
     public function status($id)
     {
         $data = Review::where('id', $id)->first();
-        if ($data->status == 'active') {
+        if ($data->status == 'Active') {
             // If the current status is active, change it to inactive
-            $data->status = 'inactive';
+            $data->status = 'Inactive';
             $data->save();
 
             // Return JSON response indicating success with message and updated data
@@ -175,7 +176,7 @@ class ReviewController extends Controller
             ]);
         } else {
             // If the current status is inactive, change it to active
-            $data->status = 'active';
+            $data->status = 'Active';
             $data->save();
 
             // Return JSON response indicating success with a message and updated data.

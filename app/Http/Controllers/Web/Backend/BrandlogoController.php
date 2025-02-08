@@ -64,7 +64,7 @@ class BrandlogoController extends Controller
         // Validation rules
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
 
@@ -105,7 +105,7 @@ class BrandlogoController extends Controller
         // Validation rules
         $request->validate([
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:Active,Inactive',
         ]);
 
         try {
@@ -153,9 +153,9 @@ class BrandlogoController extends Controller
     public function status($id)
     {
         $data = Brandlogo::where('id', $id)->first();
-        if ($data->status == 'active') {
+        if ($data->status == 'Active') {
             // If the current status is active, change it to inactive
-            $data->status = 'inactive';
+            $data->status = 'Inactive';
             $data->save();
 
             // Return JSON response indicating success with message and updated data
@@ -166,7 +166,7 @@ class BrandlogoController extends Controller
             ]);
         } else {
             // If the current status is inactive, change it to active
-            $data->status = 'active';
+            $data->status = 'Active';
             $data->save();
 
             // Return JSON response indicating success with a message and updated data.
