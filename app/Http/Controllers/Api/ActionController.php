@@ -134,7 +134,8 @@ class ActionController extends Controller
     public function update(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'data_id' => 'required|string',
+            'order_item_id' => 'required|integer',
+            'action_id' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -147,7 +148,12 @@ class ActionController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        $dataEntry = Data::find($request->data_id);
+
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
+        $dataEntry = Data::find($request->action_id);
 
         if (!$dataEntry) {
             return response()->json([
@@ -155,7 +161,7 @@ class ActionController extends Controller
                 'message' => 'Data not found for the provided data_id.',
             ], 404);
         }
-        $dataToStore = $request->except(['data_id', 'image', 'cover_image']);
+        $dataToStore = $request->except(['order_item_id','action_id', 'image', 'cover_image']);
 
         $fileFields = ['image', 'cover_image'];
         foreach ($fileFields as $fileField) {
@@ -262,6 +268,35 @@ class ActionController extends Controller
         $data->save();
         return $this->success($data, 'Data Fatch', 200);
     }
+
+    public function edit(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_item_id' => 'required|integer',
+            'action_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Check if order item exists
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
+
+        $data = Data::find($request->action_id);
+        $data['data'] = json_decode($data->data, true);
+
+        return $this->success($data, 'Data Fetch Success', 200);
+
+    }
+
 
 
     private function check($order_item_id)

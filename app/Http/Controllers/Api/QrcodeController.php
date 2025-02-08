@@ -23,18 +23,17 @@ class QrcodeController extends Controller
         $orderItem = DB::table('order_items')
             ->select(
                 'order_items.unique_code',
-                'product__types.name',  // Select the type_name from product__types
-                'data.data'                  // Select the 'data' field from the 'data' table (JSON-encoded)
+                'product__types.name', 
+                'data.data'                 
             )
             ->join('product__types', 'order_items.id', '=', 'product__types.order_item_id')  // Join order_items to product__types on order_item_id
             ->join('data', 'product__types.id', '=', 'data.category_id')  // Join product__types to data on category_id
-            ->where('data.active', 1)   // Only active data
-            ->where('order_items.unique_code', $code)  // Filtering by unique_code (code)
-            ->first();  // Use first() to get a single result
+            ->where('data.active', 1) 
+            ->where('order_items.unique_code', $code)  
+            ->first(); 
 
-        // Check if an order item was found
         if (!$orderItem) {
-            return response()->json(['message' => 'Order item not found'], 404);
+            return $this->error([],'Action Not Found!',400);
         }
 
         // Decode the JSON data field into a PHP array
@@ -43,7 +42,7 @@ class QrcodeController extends Controller
         }
 
         // Return the result as JSON
-        return response()->json($orderItem);
+        return $this->success($orderItem,'Data Fetch Successfully!',200);
     }
 
 
