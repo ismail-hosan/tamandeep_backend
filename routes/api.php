@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\CMSController;
 use App\Http\Controllers\Api\QrcodeController;
 use App\Http\Controllers\Api\StripeController;
+use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,6 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.create');
+    Route::post('/subscription', [SubscriptionController::class, 'createSubscriptionSession'])->name('checkout.subscriptions');
 
 
 
@@ -75,4 +77,4 @@ Route::prefix('card')->group(function () {
 // CMS Route
 
 Route::get('/action/view/{code}', [QrcodeController::class, 'view'])->name('user.view');
-Route::post('stripe/webhook', [StripeController::class, 'handle']);
+// Route::post('stripe/webhook', [StripeController::class, 'handle']);
