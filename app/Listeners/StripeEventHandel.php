@@ -17,44 +17,31 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
-
+use Laravel\Cashier\Events\WebhookReceived;
 class StripeEventHandel
 {
     public function handleWebhook(Request $request)
     {
-        $endpointSecret = config('services.stripe.webhook_secret');
-        $sigHeader = $request->header('Stripe-Signature');
-        $payload = $request->getContent();
-
+        // Use Cashier's handleWebhook method for signature verification and event handling
         try {
-            // Verify webhook signature
-            $event = Webhook::constructEvent($payload, $sigHeader, $endpointSecret);
-        } catch (\Exception $e) {
-            // Log error if signature verification fails
-            Log::error('Stripe Webhook Signature Verification Failed', [
-                'error_message' => $e->getMessage(),
-                'payload' => $payload,
-                'signature' => $sigHeader
-            ]);
-            return response()->json(['status' => 'error', 'message' => 'Webhook signature verification failed'], 400);
-        }
+            // Cashier handles the webhook signature verification and event processing.
+            $event = Cashier::handleWebhook($request);
 
-        // Handle the event based on its type
-        try {
-            $this->handleEvent($event);
+            // Now you can handle custom logic based on the event type.
+            $this->handleCustomEvent($event);
+
+            return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
             Log::error('Error handling Stripe webhook', [
                 'error_message' => $e->getMessage(),
-                'event' => $event
+                'event' => $request->getContent()
             ]);
-            return response()->json(['status' => 'error', 'message' => 'Error handling event'], 500);
+            return response()->json(['status' => 'error', 'message' => 'Error processing webhook'], 500);
         }
-
-        return response()->json(['status' => 'success']);
     }
 
-    // Handles event processing based on event type
-    private function handleEvent($event)
+    // Handle custom logic based on the event type
+    private function handleCustomEvent($event)
     {
         switch ($event->type) {
             case 'checkout.session.completed':
@@ -87,9 +74,10 @@ class StripeEventHandel
         }
     }
 
-    // Handles 'checkout.session.completed' event (One-time payment)
+    // Handle 'checkout.session.completed' event (One-time payment)
     private function handleCheckoutSessionCompleted($event)
     {
+        dd('ok');
         $paymentIntent = $event->data->object; // Stripe\PaymentIntent
         $payment = Payment::find($paymentIntent->metadata->order_id);
         $user = $paymentIntent->metadata->user_id;
