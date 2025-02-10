@@ -77,4 +77,4 @@ Route::prefix('card')->group(function () {
 // CMS Route
 
 Route::get('/action/view/{code}', [QrcodeController::class, 'view'])->name('user.view');
-// Route::post('stripe/webhook', [StripeController::class, 'handle']);
+Route::post('stripe/webhook', [StripeController::class, 'handle']);

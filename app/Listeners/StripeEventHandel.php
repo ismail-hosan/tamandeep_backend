@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\User;
 use Stripe\Stripe;
 use Stripe\Webhook;
 use Illuminate\Http\Request;
@@ -12,8 +13,8 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Card;
-use QrCode;
-use PngWriter;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Cashier;
 
