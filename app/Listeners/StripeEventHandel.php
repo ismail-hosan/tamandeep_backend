@@ -8,7 +8,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use App\Models\Payment;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Subscription;
+use Laravel\Cashier\Subscription;
 use App\Models\Cart;
 use Illuminate\Support\Str;
 use Stripe\Stripe;
