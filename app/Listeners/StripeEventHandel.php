@@ -16,8 +16,6 @@ use App\Models\Card;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Str;
-use Laravel\Cashier\Cashier;
-use Laravel\Cashier\Events\WebhookReceived;
 class StripeEventHandel
 {
     public function handleWebhook(Request $request)
