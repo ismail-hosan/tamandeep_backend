@@ -142,7 +142,7 @@ class StripeController extends Controller
         if ($paymentId) {
             $payment = Payment::find($paymentId);
             if ($payment) {
-                $payment->status = 'active';
+                $payment->status = 'success';
                 $payment->save();
             }
         }

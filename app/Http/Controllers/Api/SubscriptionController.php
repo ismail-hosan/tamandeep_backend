@@ -53,6 +53,7 @@ class SubscriptionController extends Controller
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
                 'metadata' => [
+                    'user_id'=>$user->id,
                     'order_id' => $payment->id,  // Optionally include the order ID
                 ],
                 'customer_email' => $user->email,  // Optional: Store the customer's email
