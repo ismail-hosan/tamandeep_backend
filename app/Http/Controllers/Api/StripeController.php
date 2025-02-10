@@ -128,10 +128,12 @@ class StripeController extends Controller
                     break;
 
                 // Add more case statements for other Stripe events as needed
-                default:
-                    // Log unhandled events
-                    \Log::warning('Unhandled event type', ['event_type' => $event->type]);
-                    return response()->json(['status' => 'error', 'message' => 'Unhandled event type'], 400);
+                case 'customer.subscription.created':
+                    dd('ok');
+                    break;
+                case 'customer.subscription.updated':
+                    dd('ok');
+                    break;
             }
         } else {
             // Log if event is null or malformed
