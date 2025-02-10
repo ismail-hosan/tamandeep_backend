@@ -110,7 +110,7 @@ class StripeController extends Controller
                             'unique_code' => $uniqueId,
                         ]);
 
-                        $qrCodeUrl = env('APP_URL') . '/redeem/' . $orderItem->unique_code;
+                        $qrCodeUrl = 'http://localhost:5173/' . $orderItem->unique_code;
                         $qrCode = new QrCode($qrCodeUrl);
                         $writer = new PngWriter();
                         $qrCodeImage = $writer->write($qrCode)->getString();

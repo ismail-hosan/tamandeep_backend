@@ -24,7 +24,8 @@ class CartController extends Controller
         } else {
             $cart->items = $cart->items->map(function ($item) {
                 return [
-                    'id' => $item->id,
+                    // 'id' => $item->id,
+                    'product_id'=> $item->product->id ?? null,
                     'name' => $item->product->name,
                     'image' => $item->product->image,
                     'quantity' => $item->quantity,
