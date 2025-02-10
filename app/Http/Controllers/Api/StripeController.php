@@ -127,7 +127,12 @@ class StripeController extends Controller
             }
 
             // Clear cart
-            Cart::where('user_id', $user)->delete();
+            $cartItems = Cart::where('user_id', $user)->with('items')->first();
+            foreach ($cartItems->items as $cartItem) {
+                $cartItem->delete();  // Remove cart item from the cart
+            }
+            $cartItems->delete();
+
         } else {
             \Log::warning('Payment not found', ['order_id' => $session->metadata->order_id]);
         }
