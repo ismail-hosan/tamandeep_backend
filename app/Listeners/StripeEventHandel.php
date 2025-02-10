@@ -77,7 +77,6 @@ class StripeEventHandel
     // Handle 'checkout.session.completed' event (One-time payment)
     private function handleCheckoutSessionCompleted($event)
     {
-        dd('ok');
         $paymentIntent = $event->data->object; // Stripe\PaymentIntent
         $payment = Payment::find($paymentIntent->metadata->order_id);
         $user = $paymentIntent->metadata->user_id;

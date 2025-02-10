@@ -3,220 +3,143 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Stripe\Stripe;
-use Stripe\Webhook;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use App\Models\Payment;
+use App\Models\Card;
+use App\Models\Cart;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Cart;
-use App\Models\Card;
+use Illuminate\Http\Request;
+use Stripe\Stripe;
+use Stripe\Webhook;
+use App\Models\Payment;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Illuminate\Support\Str;
-use Laravel\Cashier\Cashier;
+use Illuminate\Support\Facades\Storage;
 
 
 class StripeController extends Controller
 {
-    public function handleWebhook(Request $request)
+    public function handle(Request $request)
     {
-        $endpointSecret = config('services.stripe.webhook_secret');
-        $sigHeader = $request->header('Stripe-Signature');
+        // Set the Stripe secret key for verification
+        $stripeApiKey = config('services.stripe.secret');
+        Stripe::setApiKey($stripeApiKey);
+        $endpoint_secret = config('services.stripe.webhook_secret');
+
+        $sig_header = $request->header('Stripe-Signature');
         $payload = $request->getContent();
 
+        $event = null;
+
         try {
-            // Verify webhook signature
-            $event = Webhook::constructEvent($payload, $sigHeader, $endpointSecret);
+            $event = Webhook::constructEvent($payload, $sig_header, $endpoint_secret);
         } catch (\Exception $e) {
             // Log error if signature verification fails
-            Log::error('Stripe Webhook Signature Verification Failed', [
+            \Log::error('Stripe Webhook Signature Verification Failed', [
                 'error_message' => $e->getMessage(),
                 'payload' => $payload,
-                'signature' => $sigHeader
+                'signature' => $sig_header
             ]);
+
+            // Return error response to Stripe
             return response()->json(['status' => 'error', 'message' => 'Webhook signature verification failed'], 400);
         }
 
-        // Handle the event based on its type
-        try {
-            $this->handleEvent($event);
-        } catch (\Exception $e) {
-            Log::error('Error handling Stripe webhook', [
-                'error_message' => $e->getMessage(),
-                'event' => $event
-            ]);
-            return response()->json(['status' => 'error', 'message' => 'Error handling event'], 500);
-        }
+        if ($event) {
+            switch ($event->type) {
+                case 'checkout.session.completed':
+                    $paymentIntent = $event->data->object; // Contains Stripe\PaymentIntent
+                    $payment = Payment::find($paymentIntent->metadata->order_id);
+                    $user = $paymentIntent->metadata->user_id;
 
-        return response()->json(['status' => 'success']);
-    }
+                    if ($payment) {
+                        $payment->status = 'success';  // Update the payment status to 'success'
+                        $payment->save();
 
-    // Handles event processing based on event type
-    private function handleEvent($event)
-    {
-        switch ($event->type) {
-            case 'checkout.session.completed':
-                $this->handleCheckoutSessionCompleted($event);
-                break;
+                        // Retrieve the order items from metadata
+                        $items = json_decode($paymentIntent->metadata->items, true);  // Decode the items array stored as JSON
 
-            case 'invoice.payment_succeeded':
-                $this->handleInvoicePaymentSucceeded($event);
-                break;
+                        // Log the retrieved order items
+                        \Log::info('Order items from metadata', ['items' => $items]);
 
-            case 'invoice.payment_failed':
-                $this->handleInvoicePaymentFailed($event);
-                break;
+                        // Create the Order record
+                        $order = Order::create([
+                            'user_id' => $payment->user_id,  // Assuming you saved the user_id in the payment model
+                            'payment_id' => $payment->id,    // Use the payment ID for the order
+                            // 'status' => 'completed',         // Set the order status as 'completed' or as per your flow
+                        ]);
 
-            case 'customer.subscription.created':
-                $this->handleSubscriptionCreated($event);
-                break;
+                        // Store order items in the order_items table
+                        foreach ($items as $item) {
+                            $product = Card::find($item['product_id']);
+                            if ($product) {
+                                // Create multiple order items based on the quantity
+                                for ($i = 0; $i < $item['quantity']; $i++) {
+                                    // Generate a unique ID for each order item
+                                    $uniqueId = Str::uuid();  // Use UUID to generate a unique ID for each order item
 
-            case 'customer.subscription.updated':
-                $this->handleSubscriptionUpdated($event);
-                break;
+                                    // Save each order item to the order_items table
+                                    $orderItem = OrderItem::create([
+                                        'order_id' => $order->id,           // Link the order item to the created order
+                                        'card_id' => $product->id,
+                                        'unique_code' => $uniqueId,
+                                    ]);
 
-            case 'customer.subscription.deleted':
-                $this->handleSubscriptionDeleted($event);
-                break;
+                                    $qrCodeUrl = 'http://localhost:5173/' . $orderItem->unique_code;  // URL with the unique_code parameter
+                                    $qrCode = new QrCode($qrCodeUrl);
+                                    $writer = new PngWriter();
+                                    $qrCodeImage = $writer->write($qrCode)->getString();
 
-            default:
-                Log::warning('Unhandled Stripe event type', ['event_type' => $event->type]);
-                break;
-        }
-    }
+                                    // Save QR code image
+                                    $qrCodeFileName = 'qr_code_' . $orderItem->id . '.png';
+                                    Storage::disk('public')->put('qrcodes/' . $qrCodeFileName, $qrCodeImage);
 
-    // Handles 'checkout.session.completed' event (One-time payment)
-    private function handleCheckoutSessionCompleted($event)
-    {
-        $paymentIntent = $event->data->object; // Stripe\PaymentIntent
-        $payment = Payment::find($paymentIntent->metadata->order_id);
-        $user = $paymentIntent->metadata->user_id;
+                                    // Update the order_item with the QR code path
+                                    $orderItem->qr_code = 'qrcodes/' . $qrCodeFileName;
+                                    $orderItem->save();
+                                }
+                                $cartItems = Cart::where('user_id', $user)->with('items')->first();
+                                foreach ($cartItems->items as $cartItem) {
+                                    $cartItem->delete();  // Remove cart item from the cart
+                                }
+                            } else {
+                                // Log if the product is not found
+                                \Log::warning('Product not found', ['product_id' => $item['product_id']]);
+                            }
+                        }
+                    } else {
+                        // Log if the payment is not found
+                        \Log::warning('Payment not found', ['order_id' => $paymentIntent->metadata->order_id]);
+                    }
+                    break;
 
-        if ($payment) {
-            // Update payment status to 'success'
-            $payment->status = 'success';
-            $payment->save();
+                case 'checkout.session.expired':
+                    $paymentIntent = $event->data->object; // Contains Stripe\PaymentIntent
+                    $payment = Payment::find($paymentIntent->metadata->order_id);  // Retrieve the payment using the order ID
 
-            // Decode order items stored in metadata
-            $items = json_decode($paymentIntent->metadata->items, true);
+                    // Log payment information for expired session
+                    \Log::info('Checkout session expired', ['payment_intent' => $paymentIntent, 'payment' => $payment]);
 
-            Log::info('Order items from metadata', ['items' => $items]);
+                    if ($payment) {
+                        $payment->status = 'failed';  // Update the payment status to 'failed'
+                        $payment->save();
+                    }
+                    break;
 
-            // Create the order record
-            $order = Order::create([
-                'user_id' => $payment->user_id,
-                'payment_id' => $payment->id,
-            ]);
-
-            // Process each item in the order
-            foreach ($items as $item) {
-                $product = Card::find($item['product_id']);
-                if ($product) {
-                    $this->processOrderItems($item, $order, $product);
-                    $this->clearCart($user);
-                } else {
-                    Log::warning('Product not found', ['product_id' => $item['product_id']]);
-                }
+                // Add more case statements for other Stripe events as needed
+                default:
+                    // Log unhandled events
+                    \Log::warning('Unhandled event type', ['event_type' => $event->type]);
+                    return response()->json(['status' => 'error', 'message' => 'Unhandled event type'], 400);
             }
         } else {
-            Log::warning('Payment not found', ['order_id' => $paymentIntent->metadata->order_id]);
-        }
-    }
-
-    // Process each order item and generate QR codes
-    private function processOrderItems($item, $order, $product)
-    {
-        for ($i = 0; $i < $item['quantity']; $i++) {
-            $uniqueId = Str::uuid();
-            $orderItem = OrderItem::create([
-                'order_id' => $order->id,
-                'card_id' => $product->id,
-                'unique_code' => $uniqueId,
-            ]);
-
-            $this->generateQRCode($orderItem);
-        }
-    }
-
-    // Generate and store QR code for order item
-    private function generateQRCode($orderItem)
-    {
-        $qrCodeUrl = 'http://localhost:5173/' . $orderItem->unique_code;
-        $qrCode = new QrCode($qrCodeUrl);
-        $writer = new PngWriter();
-        $qrCodeImage = $writer->write($qrCode)->getString();
-
-        $qrCodeFileName = 'qr_code_' . $orderItem->id . '.png';
-        Storage::disk('public')->put('qrcodes/' . $qrCodeFileName, $qrCodeImage);
-
-        $orderItem->qr_code = 'qrcodes/' . $qrCodeFileName;
-        $orderItem->save();
-    }
-
-    // Clear the user's cart after purchase
-    private function clearCart($userId)
-    {
-        $cartItems = Cart::where('user_id', $userId)->with('items')->first();
-        foreach ($cartItems->items as $cartItem) {
-            $cartItem->delete();
-        }
-    }
-
-    // Handles 'customer.subscription.created' event (Subscription Created)
-    private function handleSubscriptionCreated($event)
-    {
-        $subscription = $event->data->object; // Stripe\Subscription
-        $user = $subscription->customer;
-
-        // Here, handle subscription creation (you can store this in the database)
-        $userModel = User::find($user);
-
-        if ($userModel) {
-            $userModel->newSubscription('main', $subscription->plan->id)
-                ->create($subscription->payment_method);
+            // Log if event is null or malformed
+            \Log::error('Received malformed event', ['event' => $event]);
+            return response()->json(['status' => 'error', 'message' => 'Malformed event received'], 400);
         }
 
-        Log::info('Subscription created', ['subscription' => $subscription]);
-    }
-
-    // Handles 'customer.subscription.updated' event (Subscription Updated)
-    private function handleSubscriptionUpdated($event)
-    {
-        $subscription = $event->data->object; // Stripe\Subscription
-
-        Log::info('Subscription updated', ['subscription' => $subscription]);
-    }
-
-    // Handles 'customer.subscription.deleted' event (Subscription Canceled)
-    private function handleSubscriptionDeleted($event)
-    {
-        $subscription = $event->data->object; // Stripe\Subscription
-        $user = $subscription->customer;
-
-        $userModel = User::find($user);
-
-        if ($userModel) {
-            // Cancel the subscription in your database
-            $userModel->subscription('main')->cancel();
-        }
-
-        Log::info('Subscription canceled', ['subscription' => $subscription]);
-    }
-
-    // Handles 'invoice.payment_succeeded' event (Invoice Payment Succeeded)
-    private function handleInvoicePaymentSucceeded($event)
-    {
-        // Implement logic for handling successful invoice payments
-        Log::info('Invoice payment succeeded', ['event' => $event]);
-    }
-
-    // Handles 'invoice.payment_failed' event (Invoice Payment Failed)
-    private function handleInvoicePaymentFailed($event)
-    {
-        // Implement logic for handling failed invoice payments
-        Log::info('Invoice payment failed', ['event' => $event]);
+        // Return a success response to Stripe to acknowledge the webhook
+        return response()->json(['status' => 'success']);
     }
 }
