@@ -26,8 +26,8 @@ class ActionController extends Controller
         $validator = Validator::make($request->all(), [
             'order_item_id' => 'required|integer',
             'type' => 'required|string',
-            // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            // 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Check validation failure
@@ -136,8 +136,8 @@ class ActionController extends Controller
         $validator = Validator::make($request->all(), [
             'order_item_id' => 'required|integer',
             'action_id' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Check validation failure
