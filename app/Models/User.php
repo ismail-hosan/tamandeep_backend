@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, Billable;
+    use HasApiTokens, HasFactory, Notifiable;
 
 
     protected $fillable = [
@@ -51,6 +51,11 @@ class User extends Authenticatable
     public function cart()
     {
         return $this->belongsTo(Cart::class,'user_id');
+    }
+
+    public function subscription()
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
 
