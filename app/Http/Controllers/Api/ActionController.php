@@ -136,8 +136,6 @@ class ActionController extends Controller
         $validator = Validator::make($request->all(), [
             'order_item_id' => 'required|integer',
             'action_id' => 'required|string',
-            // 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            // 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Check validation failure
@@ -153,23 +151,25 @@ class ActionController extends Controller
         if ($res) {
             return $res;
         }
-        $dataEntry = Data::find($request->action_id);
 
+        $dataEntry = Data::find($request->action_id);
         if (!$dataEntry) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Data not found for the provided data_id.',
+                'message' => 'Data not found for the provided action_id.',
             ], 404);
         }
-        $dataToStore = $request->except(['order_item_id','action_id', 'image', 'cover_image']);
+
+        // Extract all data except files
+        $dataToStore = $request->except(['order_item_id', 'action_id', 'image', 'cover_image']);
 
         $fileFields = ['image', 'cover_image'];
+
         foreach ($fileFields as $fileField) {
             if ($request->hasFile($fileField)) {
-                // Validate the file before proceeding (to ensure it's an image)
+                // Validate the file before proceeding
                 $file = $request->file($fileField);
 
-                // You can add a check here if you want to restrict specific file types or sizes, for example
                 if (!$file->isValid()) {
                     return response()->json([
                         'status' => 'error',
@@ -180,15 +180,19 @@ class ActionController extends Controller
                 // Store the file and save the path
                 $filePath = $file->store(($fileField === 'image') ? 'images' : 'cover_images', 'public');
                 $dataToStore[$fileField] = $filePath;
+
+            } elseif ($request->has($fileField)) {
+                // If no file was uploaded but a text value is provided, store the text
+                $dataToStore[$fileField] = $request->input($fileField);
             }
         }
 
         try {
             // Update the existing Data entry with new data
             $dataEntry->data = json_encode($dataToStore);
-            $dataEntry->save();  // Save the updated data
+            $dataEntry->save();
 
-        } catch (\Throwable $e) { // Catch any exception during database update
+        } catch (\Throwable $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'An error occurred while updating data.',
