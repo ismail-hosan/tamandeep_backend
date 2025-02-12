@@ -25,7 +25,7 @@ class CartController extends Controller
             $cart->items = $cart->items->map(function ($item) {
                 return [
                     'id' => $item->id,
-                    'product_id'=> $item->product->id ?? null,
+                    'product_id' => $item->product->id ?? null,
                     'name' => $item->product->name,
                     'image' => $item->product->image,
                     'quantity' => $item->quantity,
@@ -89,8 +89,8 @@ class CartController extends Controller
     public function quantity(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'item_id' => 'required|integer',
-            'quantity' => 'required|integer',
+            'product_id' => 'required|integer',
+            'color_id' => 'required|integer', // Assuming color_id is part of the request
         ]);
 
         // Get the authenticated user
@@ -103,13 +103,37 @@ class CartController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        $cart_items = CartItems::find($request->item_id);
-        if (!$cart_items) {
-            return $this->error([], 'Item not found in your cart.', 404);
+
+        // Create or retrieve the cart for the authenticated user
+        $cart = Cart::firstOrCreate(
+            ['user_id' => $user->id],
+            ['created_at' => now(), 'updated_at' => now()]
+        );
+
+        $cart_item = CartItems::where([
+            'cart_id' => $cart->id,
+            'card_id' => $request->product_id,
+            'color_id' => $request->color_id
+        ])->first();
+
+        // If the cart item exists, increment the quantity
+        if ($cart_item) {
+            $cart_item->increment('quantity');
+        } else {
+            // If the cart item does not exist, create a new one with the provided quantity
+            $cart_item = CartItems::create([
+                'cart_id' => $cart->id,
+                'card_id' => $request->product_id,
+                'color_id' => $request->color_id,
+                'quantity' => 1,
+            ]);
         }
-        $cart_items->quantity = $request->quantity;
-        $cart_items->save();
-        return $this->success($cart_items, 'Quantity Changes Successfully!!', 200);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Quantity updated successfully!',
+            'data' => $cart_item, // Return the updated cart item data
+        ], 200);
     }
 
     public function delete(Request $request)

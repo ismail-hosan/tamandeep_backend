@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId(column: 'cart_id')->constrained();
             $table->foreignId('card_id')->constrained();
             $table->integer('quantity')->default(1);
-            $table->integer('color_id')->nullable();
+            $table->foreignId('color_id')->constrained('card_colors'); 
             $table->timestamps();
         });
     }
