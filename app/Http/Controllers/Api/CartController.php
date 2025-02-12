@@ -89,8 +89,10 @@ class CartController extends Controller
     public function quantity(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            // 'item_id' => 'required|integer',
             'product_id' => 'required|integer',
-            'color_id' => 'required|integer', // Assuming color_id is part of the request
+            'quantity' => 'required|integer',
+            'color_id' => 'required|integer'
         ]);
 
         // Get the authenticated user
@@ -110,30 +112,20 @@ class CartController extends Controller
             ['created_at' => now(), 'updated_at' => now()]
         );
 
-        $cart_item = CartItems::where([
-            'cart_id' => $cart->id,
-            'card_id' => $request->product_id,
-            'color_id' => $request->color_id
-        ])->first();
+        // Update or create the cart item with the new quantity
+        $cart_item = CartItems::updateOrCreate(
+            [
+                'cart_id' => $cart->id, // Corrected to cart_id
+                'card_id' => $request->product_id, // Assuming item_id is part of the request
+                'color_id' => $request->color_id, // Ensure color_id is passed in the request
+            ],
+            [
+                'quantity' => $request->quantity,
+            ]
+        );
 
-        // If the cart item exists, increment the quantity
-        if ($cart_item) {
-            $cart_item->increment('quantity');
-        } else {
-            // If the cart item does not exist, create a new one with the provided quantity
-            $cart_item = CartItems::create([
-                'cart_id' => $cart->id,
-                'card_id' => $request->product_id,
-                'color_id' => $request->color_id,
-                'quantity' => 1,
-            ]);
-        }
+        return $this->success($cart_item,'Quantity Changes Successfully!!',200);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Quantity updated successfully!',
-            'data' => $cart_item, // Return the updated cart item data
-        ], 200);
     }
 
     public function delete(Request $request)
