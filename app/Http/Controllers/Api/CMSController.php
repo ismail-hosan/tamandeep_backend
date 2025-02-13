@@ -16,28 +16,50 @@ class CMSController extends Controller
     use apiresponse;
     public function index(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|string',
-        ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+        // Query the CMS model to fetch all records
+        $cmsData = C_M_S::all();  // Fetch all data, no filtering by 'type'
+
+        if ($cmsData->isEmpty()) {
+            return $this->error([], 'No data found', 404);
         }
-        $type = $request->input('type');
 
-        // Query the CMS model based on the type provided
-        $cmsData = C_M_S::where('type', $type)->first();
+        // Prepare the response grouped by type
+        $response = [];
 
-        if (!$cmsData) {
-            return $this->error([], 'No data found for the specified type', 404);
+        foreach ($cmsData as $data) {
+            if (!isset($response[$data->type])) {
+                $response[$data->type] = [];
+            }
+            $response[$data->type][] = [
+                'id' => $data->id,
+                'type' => $data->type,
+                'title' => $data->title,
+                'hilight_title' => $data->hilight_title,
+                'descriptions' => $data->descriptions,
+                'image' => $data->image,
+                'first_image' => $data->first_image,
+                'first_title' => $data->first_title,
+                'first_desc' => $data->first_desc,
+                'second_image' => $data->second_image,
+                'second_title' => $data->second_title,
+                'second_desc' => $data->second_desc,
+                'third_image' => $data->third_image,
+                'third_title' => $data->third_title,
+                'third_desc' => $data->third_desc,
+                'created_at' => $data->created_at,
+                'updated_at' => $data->updated_at,
+            ];
         }
-        return $this->success($cmsData, 'Data Fatch success', 200);
 
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Data fetched successfully',
+            'data' => $response,
+            'code' => 200
+        ], 200);
     }
+
 
     public function feature()
     {
@@ -57,5 +79,5 @@ class CMSController extends Controller
         return $this->success($data, 'Data fetch success', 200);
     }
 
-   
+
 }
