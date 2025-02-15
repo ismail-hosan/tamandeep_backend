@@ -8,6 +8,8 @@ use App\Http\Requests\OtpRequest;
 use App\Http\Requests\PasswordUpdateRequest;
 use App\Mail\OtpMail;
 use App\Models\C_M_S;
+use App\Models\Cart;
+use App\Models\CartItems;
 use App\Models\User;
 use App\Traits\apiresponse;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +60,27 @@ class AuthController extends Controller
         // Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        // Check if cart data exists in the request
+        if ($request->has('cart') && is_array($request->cart)) {
+            $cart = Cart::firstOrCreate(
+                ['user_id' => $user->id],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+
+            foreach ($request->cart as $item) {
+                CartItems::updateOrCreate(
+                    [
+                        'cart_id' => $cart->id,
+                        'card_id' => $item['card_id'],
+                        'color_id' => $item['color_id'],
+                    ],
+                    [
+                        'quantity' => $item['quantity'],
+                    ]
+                );
+            }
+        }
+
         // Successful response
         return response()->json([
             'status' => 'success',
@@ -87,16 +110,34 @@ class AuthController extends Controller
 
         // Check if user exists and password is correct
         if (!$user || !Hash::check($request->input('password'), $user->password)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid credentials',
-            ], 401);
+            return $this->error([], 'Invalid credentials', 401);
         }
 
         // Generate token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Successful response
+        // Check if cart data is coming from the request
+        if ($request->has('cart') && is_array($request->cart)) {
+            $cart = Cart::firstOrCreate(
+                ['user_id' => $user->id],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+
+            foreach ($request->cart as $item) {
+                CartItems::updateOrCreate(
+                    [
+                        'cart_id' => $cart->id,
+                        'card_id' => $item['card_id'],
+                        'color_id' => $item['color_id'],
+                    ],
+                    [
+                        'quantity' => $item['quantity'],
+                    ]
+                );
+            }
+        }
+
+        // Return response with the user and token
         return response()->json([
             'status' => 'success',
             'user' => $user,
@@ -135,7 +176,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'error',
             'message' => 'User has no orders',
-            'user'=>$user,
+            'user' => $user,
             'has_order' => false,
             'payment_status' => 'pending',
         ]);
