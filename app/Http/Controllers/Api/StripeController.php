@@ -181,7 +181,7 @@ class StripeController extends Controller
     private function handleSubscriptionCompleted($session)
     {
         $userId = $session->metadata->user_id ?? null;
-        $plan = $session->metadata->type ?? null;
+        $plan = $session->metadata->type;
         $paymentId = $session->metadata->order_id ?? null;
         $subscriptionId = $session->subscription ?? null;
 
