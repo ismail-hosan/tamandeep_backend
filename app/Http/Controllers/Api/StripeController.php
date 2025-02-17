@@ -193,15 +193,31 @@ class StripeController extends Controller
             }
         }
 
-        // Store subscription in the database
-        $subscription = Subscription::create([
-            'user_id' => $userId,
-            'plan' => $plan,
-            'stripe_subscription_id' => $subscriptionId,
-            'status' => 'active',
-        ]);
+        // Check if the user already has a subscription
+        $existingSubscription = Subscription::where('user_id', $userId)->where('status', 'active')->first();
 
-        \Log::info('Subscription created successfully', ['subscription_id' => $subscriptionId]);
+        if ($existingSubscription) {
+            // If a subscription exists, update the existing subscription plan
+            $existingSubscription->plan = $plan;
+            $existingSubscription->stripe_subscription_id = $subscriptionId;
+            $existingSubscription->status = 'active';  // Ensure the subscription is set as active
+            $existingSubscription->save();
+
+            \Log::info('Subscription updated successfully', [
+                'subscription_id' => $existingSubscription->id,
+                'new_plan' => $plan
+            ]);
+        } else {
+            // If no active subscription exists, create a new subscription
+            $subscription = Subscription::create([
+                'user_id' => $userId,
+                'plan' => $plan,
+                'stripe_subscription_id' => $subscriptionId,
+                'status' => 'active',
+            ]);
+
+            \Log::info('New subscription created successfully', ['subscription_id' => $subscriptionId]);
+        }
     }
 
     private function handleSubscriptionPaymentSuccess($invoice)
