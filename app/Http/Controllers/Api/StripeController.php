@@ -141,6 +141,7 @@ class StripeController extends Controller
     private function handleSubscriptionCompleted($session)
     {
         $userId = $session->metadata->user_id ?? null;
+        $plan = $session->metadata->type ?? null;
         $paymentId = $session->metadata->order_id ?? null;
         $subscriptionId = $session->subscription ?? null;
 
@@ -155,6 +156,7 @@ class StripeController extends Controller
         // Store subscription in the database
         $subscription = Subscription::create([
             'user_id' => $userId,
+            'plan' => $plan,
             'stripe_subscription_id' => $subscriptionId,
             'status' => 'active',
         ]);
