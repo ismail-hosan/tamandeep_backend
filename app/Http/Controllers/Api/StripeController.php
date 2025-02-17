@@ -151,16 +151,26 @@ class StripeController extends Controller
         $dbSubscription = Subscription::where('stripe_subscription_id', $stripeSubscriptionId)->first();
 
         if ($dbSubscription) {
-            // If subscription is found, update the status and plan
-            $dbSubscription->status = $status;
-            $dbSubscription->plan = $plan;  // Update the plan field in the database
-            $dbSubscription->save();
+            // Check if the current subscription is still active
+            if ($dbSubscription->status === 'active') {
+                // If subscription is found and still active, update the status and plan
+                $dbSubscription->status = $status;
+                $dbSubscription->plan = $plan;  // Update the plan field in the database
+                $dbSubscription->save();
 
-            \Log::info('Subscription updated', [
-                'subscription_id' => $stripeSubscriptionId,
-                'status' => $status,
-                'new_plan' => $plan  // Log the new plan
-            ]);
+                \Log::info('Subscription updated successfully', [
+                    'subscription_id' => $stripeSubscriptionId,
+                    'status' => $status,
+                    'new_plan' => $plan  // Log the new plan
+                ]);
+            } else {
+                // If the subscription is not active (e.g., expired or past due)
+                \Log::warning('Subscription is not active', [
+                    'subscription_id' => $stripeSubscriptionId,
+                    'status' => $status
+                ]);
+                // Optionally handle the expired status (e.g., notify the user or take further action)
+            }
         } else {
             \Log::warning('Subscription not found in database', [
                 'subscription_id' => $stripeSubscriptionId
