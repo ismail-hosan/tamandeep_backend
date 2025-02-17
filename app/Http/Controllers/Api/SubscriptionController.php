@@ -15,6 +15,7 @@ class SubscriptionController extends Controller
     use apiresponse;
     public function createSubscriptionSession(Request $request, $type)
     {
+       
         if (!$type) {
             return $this->error([], "Type Not Found!", 404);
         }

@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 
 class StripeController extends Controller
@@ -185,6 +186,10 @@ class StripeController extends Controller
         $paymentId = $session->metadata->order_id ?? null;
         $subscriptionId = $session->subscription ?? null;
 
+        // Carbon instance for period_start and period_end
+        $periodStart = isset($session->created) ? Carbon::createFromTimestamp($session->created) : null;
+        $periodEnd = isset($session->current_period_end) ? Carbon::createFromTimestamp($session->current_period_end) : null;
+
         if ($paymentId) {
             $payment = Payment::find($paymentId);
             if ($payment) {
@@ -197,15 +202,19 @@ class StripeController extends Controller
         $existingSubscription = Subscription::where('user_id', $userId)->where('status', 'active')->first();
 
         if ($existingSubscription) {
-            // If a subscription exists, update the existing subscription plan
+            // If a subscription exists, update the existing subscription plan and period
             $existingSubscription->plan = $plan;
             $existingSubscription->stripe_subscription_id = $subscriptionId;
             $existingSubscription->status = 'active';  // Ensure the subscription is set as active
+            $existingSubscription->period_start = $periodStart;
+            $existingSubscription->period_end = $periodEnd;
             $existingSubscription->save();
 
             \Log::info('Subscription updated successfully', [
                 'subscription_id' => $existingSubscription->id,
-                'new_plan' => $plan
+                'new_plan' => $plan,
+                'period_start' => $periodStart->toDateTimeString(),
+                'period_end' => $periodEnd->toDateTimeString()
             ]);
         } else {
             // If no active subscription exists, create a new subscription
@@ -214,9 +223,15 @@ class StripeController extends Controller
                 'plan' => $plan,
                 'stripe_subscription_id' => $subscriptionId,
                 'status' => 'active',
+                'period_start' => $periodStart,
+                'period_end' => $periodEnd,
             ]);
 
-            \Log::info('New subscription created successfully', ['subscription_id' => $subscriptionId]);
+            \Log::info('New subscription created successfully', [
+                'subscription_id' => $subscriptionId,
+                'period_start' => $periodStart->toDateTimeString(),
+                'period_end' => $periodEnd->toDateTimeString()
+            ]);
         }
     }
 
