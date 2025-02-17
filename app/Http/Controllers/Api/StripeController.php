@@ -187,8 +187,8 @@ class StripeController extends Controller
         $subscriptionId = $session->subscription ?? null;
 
         // Carbon instance for period_start and period_end
-        $periodStart = isset($session->created) ? Carbon::createFromTimestamp($session->created) : null;
-        $periodEnd = isset($session->current_period_end) ? Carbon::createFromTimestamp($session->current_period_end) : null;
+        $periodStart = isset($session->period->start) ? Carbon::createFromTimestamp($session->period->start) : null;
+        $periodEnd = isset($session->period->end) ? Carbon::createFromTimestamp($session->period->end) : null;
 
         if ($paymentId) {
             $payment = Payment::find($paymentId);
