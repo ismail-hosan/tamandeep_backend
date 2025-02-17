@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Traits\apiresponse;
 use Illuminate\Http\Request;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -11,8 +12,18 @@ use App\Models\Payment;
 
 class SubscriptionController extends Controller
 {
-    public function createSubscriptionSession(Request $request)
+    use apiresponse;
+    public function createSubscriptionSession(Request $request, $type)
     {
+        if (!$type) {
+            return $this->error([], "Type Not Found!", 404);
+        }
+
+        if ($type == 'premium') {
+            $stripePriceId = 'price_1QjilySAVzIaJZPHz7GF9Wgn';
+        } else {
+            $stripePriceId = 'price_1Qis3LSAVzIaJZPHVCN8osuS';
+        }
         // Get the Stripe API key from your config
         $stripeApiKey = config('services.stripe.secret');
 
@@ -26,8 +37,7 @@ class SubscriptionController extends Controller
         // Set the Stripe API key
         \Stripe\Stripe::setApiKey($stripeApiKey);
 
-        // Subscription price ID (make sure this is a valid price ID for your subscription plan)
-        $stripePriceId = 'price_1Qis3LSAVzIaJZPHVCN8osuS'; // Update this with your actual price ID
+
         $user = auth()->user();
 
         try {
@@ -53,7 +63,7 @@ class SubscriptionController extends Controller
                 'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}&order=' . $payment->id,
                 'cancel_url' => route('checkout.cancel'),
                 'metadata' => [
-                    'user_id'=>$user->id,
+                    'user_id' => $user->id,
                     'order_id' => $payment->id,  // Optionally include the order ID
                 ],
                 'customer_email' => $user->email,  // Optional: Store the customer's email

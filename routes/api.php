@@ -59,7 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.create');
-    Route::post('/subscription', [SubscriptionController::class, 'createSubscriptionSession'])->name('checkout.subscriptions');
+    Route::post('/subscription/{type}', [SubscriptionController::class, 'createSubscriptionSession'])->name('checkout.subscriptions');
 
 
 
