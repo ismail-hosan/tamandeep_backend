@@ -145,7 +145,7 @@ class StripeController extends Controller
     {
         $stripeSubscriptionId = $subscription->id;
         $status = $subscription->status;
-        $plan = $subscription->items->data[0]->plan->id;  // Get the new plan ID
+        $plan = $session->metadata->type ?? null;
 
         // Check if the subscription exists in the database
         $dbSubscription = Subscription::where('stripe_subscription_id', $stripeSubscriptionId)->first();
