@@ -67,6 +67,9 @@ class StripeController extends Controller
 
                 case 'customer.subscription.created':
                 case 'customer.subscription.updated':
+                    $invoice = $event->data->object;
+                    $this->handleSubscriptionEventsUpdate($invoice);
+                    break;
                 case 'customer.subscription.deleted':
                     $subscription = $event->data->object;
                     $this->handleSubscriptionEvents($subscription);
@@ -135,6 +138,33 @@ class StripeController extends Controller
 
         } else {
             \Log::warning('Payment not found', ['order_id' => $session->metadata->order_id]);
+        }
+    }
+
+    private function handleSubscriptionEventsUpdate($subscription)
+    {
+        $stripeSubscriptionId = $subscription->id;
+        $status = $subscription->status;
+        $plan = $subscription->items->data[0]->plan->id;  // Get the new plan ID
+
+        // Check if the subscription exists in the database
+        $dbSubscription = Subscription::where('stripe_subscription_id', $stripeSubscriptionId)->first();
+
+        if ($dbSubscription) {
+            // If subscription is found, update the status and plan
+            $dbSubscription->status = $status;
+            $dbSubscription->plan = $plan;  // Update the plan field in the database
+            $dbSubscription->save();
+
+            \Log::info('Subscription updated', [
+                'subscription_id' => $stripeSubscriptionId,
+                'status' => $status,
+                'new_plan' => $plan  // Log the new plan
+            ]);
+        } else {
+            \Log::warning('Subscription not found in database', [
+                'subscription_id' => $stripeSubscriptionId
+            ]);
         }
     }
 
