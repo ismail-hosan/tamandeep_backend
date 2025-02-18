@@ -186,9 +186,15 @@ class StripeController extends Controller
         $paymentId = $session->metadata->order_id ?? null;
         $subscriptionId = $session->subscription ?? null;
 
-        // Carbon instance for period_start and period_end
-        $periodStart = isset($session->period->start) ? Carbon::createFromTimestamp($session->period->start) : null;
-        $periodEnd = isset($session->period->end) ? Carbon::createFromTimestamp($session->period->end) : null;
+        // Getting the period start (from the `created` timestamp)
+        $periodStart = isset($session->created) ? Carbon::createFromTimestamp($session->created) : null;
+
+        // Calculating the period end as 3 months before the start date
+        $periodEnd = $periodStart ? $periodStart->copy()->addMonths(3) : null;
+
+        // Format the dates to 'Y-m-d' or any other format you need
+        $periodStartFormatted = $periodStart ? $periodStart->format('Y-m-d') : null;
+        $periodEndFormatted = $periodEnd ? $periodEnd->format('Y-m-d') : null;
 
         if ($paymentId) {
             $payment = Payment::find($paymentId);
@@ -210,12 +216,6 @@ class StripeController extends Controller
             $existingSubscription->period_end = $periodEnd;
             $existingSubscription->save();
 
-            \Log::info('Subscription updated successfully', [
-                'subscription_id' => $existingSubscription->id,
-                'new_plan' => $plan,
-                'period_start' => $periodStart->toDateTimeString(),
-                'period_end' => $periodEnd->toDateTimeString()
-            ]);
         } else {
             // If no active subscription exists, create a new subscription
             $subscription = Subscription::create([
@@ -225,12 +225,6 @@ class StripeController extends Controller
                 'status' => 'active',
                 'period_start' => $periodStart,
                 'period_end' => $periodEnd,
-            ]);
-
-            \Log::info('New subscription created successfully', [
-                'subscription_id' => $subscriptionId,
-                'period_start' => $periodStart->toDateTimeString(),
-                'period_end' => $periodEnd->toDateTimeString()
             ]);
         }
     }

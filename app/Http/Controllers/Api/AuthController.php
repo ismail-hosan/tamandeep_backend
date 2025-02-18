@@ -163,12 +163,15 @@ class AuthController extends Controller
             $lastPayment = $order->payments()->latest()->first();
 
             $paymentStatus = $lastPayment ? $lastPayment->status : 'pending';
+            // Fetch the latest subscription
+            $subscription = $user->subscription()->plan ?? null;
 
             return response()->json([
                 'status' => 'success',
                 'user' => $user,
                 'has_order' => true,
                 'payment_status' => $paymentStatus,
+                'subscription' => $subscription,
             ]);
         }
 
