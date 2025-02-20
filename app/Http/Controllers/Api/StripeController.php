@@ -18,6 +18,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 
 class StripeController extends Controller
@@ -217,7 +218,7 @@ class StripeController extends Controller
             $existingSubscription->save();
 
         } else {
-            // If no active subscription exists, create a new subscription
+             Log::error("Plan is not set when creating a new subscription",$plan);
             $subscription = Subscription::create([
                 'user_id' => $userId,
                 'plan' => $plan,

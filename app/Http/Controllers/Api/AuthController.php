@@ -9,6 +9,7 @@ use App\Http\Requests\PasswordUpdateRequest;
 use App\Mail\OtpMail;
 use App\Models\C_M_S;
 use App\Models\Cart;
+use App\Models\Subscription;
 use App\Models\CartItems;
 use App\Models\User;
 use App\Traits\apiresponse;
@@ -159,19 +160,20 @@ class AuthController extends Controller
         }
 
         $order = $user->orders()->latest()->first();
+        $subcription = Subscription::where('user_id',$user->id)->first();
         if ($order) {
             $lastPayment = $order->payments()->latest()->first();
 
             $paymentStatus = $lastPayment ? $lastPayment->status : 'pending';
             // Fetch the latest subscription
-            $subscription = $user->subscription()->plan ?? null;
+           
 
             return response()->json([
                 'status' => 'success',
                 'user' => $user,
                 'has_order' => true,
                 'payment_status' => $paymentStatus,
-                'subscription' => $subscription,
+                'subscription' => $subcription->plan,
             ]);
         }
 
