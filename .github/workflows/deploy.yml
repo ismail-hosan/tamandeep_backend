@@ -15,5 +15,5 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
           server: ftp.onetapcard.uk
-          username: tamandeep
+          username: u723786238.tamandeep
           password: "#S7jdzmpyP^:U$MR"
