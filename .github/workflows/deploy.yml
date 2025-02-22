@@ -14,6 +14,6 @@ jobs:
       - name: FTP-Deploy-Action
         uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          server: ftp.softvencefsd.xyz
-          username: tamandeep@tamandeep.softvencefsd.xyz
-          password: "(X^09#77*ujb"
+          server: ftp.onetapcard.uk
+          username: tamandeep
+          password: "#S7jdzmpyP^:U$MR"
