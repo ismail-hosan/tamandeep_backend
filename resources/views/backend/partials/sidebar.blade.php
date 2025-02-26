@@ -95,7 +95,7 @@
             {{-- Brand Logo --}}
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link" href="{{ route('brandlogo.index') }}">Brand Logos</a>
+                    <a class="menu-link"  href="{{ route('brandlogo.index') }}">Brand Logos</a>
                 </li>
             </ul>
 
