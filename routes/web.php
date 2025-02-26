@@ -85,6 +85,7 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/create', 'create')->name('user.create');
         Route::post('/store', 'store')->name('user.store');
         Route::get('/edit/{id}', 'edit')->name('user.edit');
+        Route::get('/view/{id}', 'view')->name('user.view');
         Route::post('/update/{id}', 'update')->name('user.update');
         Route::delete('/delete/{id}', 'destroy')->name('user.delete');
         Route::get('/status/{id}', 'status')->name('user.status');

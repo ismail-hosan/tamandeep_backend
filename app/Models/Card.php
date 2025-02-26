@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Card extends Model
 {
     use HasFactory;
+    protected $appends = ['image_url'];
 
     protected $guarded = [];
 
@@ -17,9 +18,9 @@ class Card extends Model
         return $this->hasMany(CardColor::class);
     }
 
-    public function getImageAttribute($value)
+    public function getImageUrlAttribute()
     {
-        return $value ? url($value) : null;
+        return url($this->image);  
     }
 
     public function getPriceAttribute($value)

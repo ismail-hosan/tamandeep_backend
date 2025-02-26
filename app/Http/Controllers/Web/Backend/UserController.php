@@ -21,13 +21,17 @@ class UserController extends Controller
                 ->addColumn('action', function ($data) {
 
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                                  <a href="' . route('user.edit', $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
-                                  <i class="bi bi-pencil"></i>
-                                  </a>
-                                  <a href="#" onclick="showDeleteConfirm(' . $data->id . ')" type="button" class="btn btn-danger text-white" title="Delete">
-                                  <i class="bi bi-trash"></i>
-                                </a>
-                                </div>';
+            <a href="' . route('user.edit', $data->id) . '" type="button" class="btn btn-primary text-white" title="Edit">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <a href="'.route('user.view',$data->id).'" type="button" class="btn btn-primary text-white" title="View">
+                <i class="bi bi-eye"></i>
+            </a>
+            <a href="#" onclick="showDeleteConfirm(' . $data->id . ')" type="button" class="btn btn-danger text-white" title="Delete">
+                <i class="bi bi-trash"></i>
+            </a>
+        </div>';
+
                 })
                 ->addColumn('status', function ($data) {
                     $status = ' <div class="form-check form-switch" style="margin-left:40px;">';
@@ -52,6 +56,11 @@ class UserController extends Controller
         return view('backend.layout.user.edit', get_defined_vars());
     }
 
+    public function view($id)
+    {
+        $user = User::with('orders.items')->find($id);
+        return view('backend.layout.user.show',get_defined_vars());
+    }
     public function update(UserUpdateRequest $request, $id)
     {
         try {
@@ -64,7 +73,7 @@ class UserController extends Controller
             $data->save();
             return redirect()->route('user.index')->with('t-success', 'Customer Data Updated Successfully!');
         } catch (\Throwable $th) {
-           Log::error($th->getMessage());
+            Log::error($th->getMessage());
         }
 
     }

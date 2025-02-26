@@ -144,7 +144,7 @@
         <!-- User-->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">User</span></li>
 
-        <li class="menu-item {{ Request::routeIs('user.index') ? 'active' : '' }}">
+        <li class="menu-item {{ Request::routeIs('user.*') ? 'active' : '' }}">
             <a href="{{ route('user.index') }}" class="menu-link">
                 <i class='menu-icon tf-icons bx bxs-user'></i>
                 <div data-i18n="Layouts">User</div>
