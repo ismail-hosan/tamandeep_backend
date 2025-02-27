@@ -166,7 +166,7 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        return redirect()->away(env('FRONTEND_URL'));
+        return redirect()->away('https://onetapcard.uk/dashboard/home');
     }
 
 

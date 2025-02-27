@@ -89,7 +89,7 @@ class SubscriptionController extends Controller
 
     public function success()
     {
-        return response()->json(['success' => true]);
+        return redirect()->away('https://onetapcard.uk/dashboard/home');
     }
 
     public function cancel()
