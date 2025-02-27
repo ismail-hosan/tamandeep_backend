@@ -20,6 +20,7 @@
                                         <th>SI</th>
                                         <th>Name</th>
                                         <th>Email</th>
+                                        <th>Plan</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -96,6 +97,12 @@
                         {
                             data: 'email',
                             name: 'email',
+                            orderable: true,
+                            searchable: true
+                        },
+                        {
+                            data: 'subscription',
+                            name: 'subscription',
                             orderable: true,
                             searchable: true
                         },

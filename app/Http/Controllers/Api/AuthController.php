@@ -173,7 +173,7 @@ class AuthController extends Controller
                 'user' => $user,
                 'has_order' => true,
                 'payment_status' => $paymentStatus,
-                'subscription' => $subcription->plan,
+                'subscription' => $subcription->plan ?? null,
             ]);
         }
 

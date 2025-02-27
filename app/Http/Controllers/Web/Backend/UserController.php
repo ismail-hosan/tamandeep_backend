@@ -15,9 +15,12 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = User::where('role', 'user')->get();
+            $data = User::where('role', 'user')->with('subscription')->get();
             return DataTables::of($data)
                 ->addIndexColumn()
+                ->addColumn('subscription',function ($data){
+                    return $data->subscription->plan ?? 'N/A';
+                })
                 ->addColumn('action', function ($data) {
 
                     return '<div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
@@ -43,7 +46,7 @@ class UserController extends Controller
 
                     return $status;
                 })
-                ->rawColumns(['action', 'status', 'image'])
+                ->rawColumns(['subscription','action', 'status', 'image'])
                 ->make(true);
         }
 

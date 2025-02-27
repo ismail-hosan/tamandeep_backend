@@ -218,7 +218,7 @@ class StripeController extends Controller
             $existingSubscription->save();
 
         } else {
-             Log::error("Plan is not set when creating a new subscription",$plan);
+            //  Log::error("Plan is not set when creating a new subscription",$plan);
             $subscription = Subscription::create([
                 'user_id' => $userId,
                 'plan' => $plan,
