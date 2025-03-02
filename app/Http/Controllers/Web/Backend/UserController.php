@@ -61,7 +61,7 @@ class UserController extends Controller
 
     public function view($id)
     {
-        $user = User::with('orders.items')->find($id);
+        $user = User::with(['orders.items','subscription'])->find($id);
         return view('backend.layout.user.show',get_defined_vars());
     }
     public function update(UserUpdateRequest $request, $id)

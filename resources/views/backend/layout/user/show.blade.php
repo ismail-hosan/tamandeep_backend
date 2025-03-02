@@ -26,8 +26,7 @@
                                         style="color: {{ $user->status == 1 ? 'green' : 'red' }}">{{ $user->status == 1 ? 'active' : 'inactive' }}</span>
                                 </p>
                                 <p><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
-                                {{-- <p><strong>Account Status:</strong> {{ $user->is_block == 0 ? 'Blocked' : 'Active' }}</p>
-                            <p><strong>Last Login at:</strong> {{ $user->last_login_at->format('d-m-y, H:i:s') }}</p> --}}
+                                <p><strong>Subscription:</strong> {{ ucfirst($user->subscription->plan ?? 'N/A') }}</p>
                             </div>
                         </div>
                     </div>
@@ -61,7 +60,8 @@
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $items->unique_code ?? 'N/A' }}</td>
                                                 <td>
-                                                    <img src="{{ asset($items->qr_code) }}" alt="">
+                                                    <img src="{{ asset('storage/app/public/' . $items->qr_code) }}"
+                                                        alt="" width="80px">
                                                 </td>
                                                 <td>
                                                     <div class="form-check form-switch">
