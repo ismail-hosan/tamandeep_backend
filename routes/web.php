@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\Backend\CardController;
 use App\Http\Controllers\Web\Backend\CMSController;
 use App\Http\Controllers\Web\Backend\DahboardController;
+use App\Http\Controllers\Web\Backend\FaqController;
 use App\Http\Controllers\Web\Backend\FeaturesController;
 use App\Http\Controllers\Web\Backend\QrcodeController;
 use App\Http\Controllers\Web\Backend\SystemSettingController;
@@ -89,6 +90,18 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::post('/update/{id}', 'update')->name('user.update');
         Route::delete('/delete/{id}', 'destroy')->name('user.delete');
         Route::get('/status/{id}', 'status')->name('user.status');
+
+    });
+
+    //-------- Faq---------//
+    Route::prefix('faq')->controller(FaqController::class)->group(function () {
+        Route::get('/', 'index')->name('faq.index');
+        Route::get('/create', 'create')->name('faq.create');
+        Route::post('/store', 'store')->name('faq.store');
+        Route::get('/edit/{id}', 'edit')->name('faq.edit');
+        Route::post('/update/{id}', 'update')->name('faq.update');
+        Route::delete('/delete/{id}', 'destroy')->name('faq.delete');
+        Route::get('/status/{id}', 'status')->name('faq.status');
 
     });
 

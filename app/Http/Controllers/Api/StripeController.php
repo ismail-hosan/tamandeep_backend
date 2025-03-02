@@ -115,7 +115,7 @@ class StripeController extends Controller
                             'unique_code' => $uniqueId,
                         ]);
 
-                        $qrCodeUrl = 'https://dashboard.onetapcard.uk/' . $orderItem->unique_code;
+                        $qrCodeUrl = 'https://onetapcard.uk/' . $orderItem->unique_code;
                         $qrCode = new QrCode($qrCodeUrl);
                         $writer = new PngWriter();
                         $qrCodeImage = $writer->write($qrCode)->getString();

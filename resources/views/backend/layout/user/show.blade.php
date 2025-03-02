@@ -60,12 +60,15 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $items->unique_code ?? 'N/A' }}</td>
-                                                <td>{{ $items->qr_code ?? 'N/A' }}</td>
+                                                <td>
+                                                    <img src="{{ asset($items->qr_code) }}" alt="">
+                                                </td>
                                                 <td>
                                                     <div class="form-check form-switch">
                                                         <input class="form-check-input" type="checkbox" role="switch"
                                                             id="flexSwitchCheckDefault"
-                                                            {{ $items->status == 1 ? 'checked' : '' }} onclick="deleteAlert()">
+                                                            {{ $items->status == 1 ? 'checked' : '' }}
+                                                            onclick="deleteAlert()">
                                                     </div>
                                                 </td>
                                                 <td>

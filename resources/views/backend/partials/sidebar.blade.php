@@ -56,9 +56,18 @@
         <li class="menu-header small text-uppercase"><span class="menu-header-text">CARD</span></li>
 
         <li class="menu-item {{ Request::routeIs('card.index') ? 'active' : '' }}">
-            <a class="menu-link" href="{{route('card.index')}}">
+            <a class="menu-link" href="{{ route('card.index') }}">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <span class="menu-title">CARD</span>
+            </a>
+        </li>
+
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">FAQ</span></li>
+
+        <li class="menu-item {{ Request::routeIs('faq.*') ? 'active' : '' }}">
+            <a class="menu-link" href="{{ route('faq.index') }}">
+                <i class="menu-icon tf-icons bx bx-home-circle"></i>
+                <span class="menu-title">FAQ</span>
             </a>
         </li>
 
@@ -68,7 +77,8 @@
 
         <li class="menu-header small text-uppercase"><span class="menu-header-text">CMS</span></li>
         <!-- CMS -->
-        <li class="menu-item {{ Request::routeIs('features.index') || Request::routeIs('review.index')   ? 'active open' : '' }}">
+        <li
+            class="menu-item {{ Request::routeIs('features.index') || Request::routeIs('review.index') ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-cog"></i>
                 <div data-i18n="Layouts">CMS</div>
@@ -87,7 +97,7 @@
 
             {{-- Review --}}
             <ul class="menu-sub">
-                <li class="menu-item {{Request::routeIs('review.*') ? 'active' : ''}}">
+                <li class="menu-item {{ Request::routeIs('review.*') ? 'active' : '' }}">
                     <a class="menu-link" href="{{ route('review.index') }}">Reviews</a>
                 </li>
             </ul>
@@ -95,7 +105,7 @@
             {{-- Brand Logo --}}
             <ul class="menu-sub">
                 <li class="menu-item">
-                    <a class="menu-link"  href="{{ route('brandlogo.index') }}">Brand Logos</a>
+                    <a class="menu-link" href="{{ route('brandlogo.index') }}">Brand Logos</a>
                 </li>
             </ul>
 
