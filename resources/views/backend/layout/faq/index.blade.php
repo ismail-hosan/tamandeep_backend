@@ -25,6 +25,7 @@
                                         <th>#</th>
                                         <th>Question</th>
                                         <th>Answer</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
