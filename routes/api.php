@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\CardController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\CMSController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\QrcodeController;
 use App\Http\Controllers\Api\StripeController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -25,6 +27,8 @@ Route::post('/cms', [CMSController::class, 'index']);
 Route::get('/cms/feature', [CMSController::class, 'feature']);
 Route::get('cms/review', [CMSController::class, 'review']);
 Route::get('cms/brand', [CMSController::class, 'brand']);
+Route::get('faq/all',[FaqController::class,'index']);
+Route::post('contact_us',[ContactController::class,'store']);
 
 
 
@@ -49,7 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/card', [UserController::class, 'index']);
     Route::post('/user/card/status', [UserController::class, 'status']);
 
-
+ 
 
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index']);
