@@ -388,7 +388,7 @@ class AuthController extends Controller
         $user->name = $request->name ?? $user->name; // Only update if provided
         $user->email = $request->email ?? $user->email; // Only update if provided
         $user->avartar = $imagePath ?? $user->avatar; // Only update avatar if provided
-        $user->occipation = $request->occupation ?? $user->occipation; // Only update if provided
+        $user->occipation = $request->occupation ? $user->occipation:null; // Only update if provided
         $user->save();
 
         return $this->success($user,'Information Update Successfully!',200);
