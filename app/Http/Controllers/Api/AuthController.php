@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helper\ImageHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ForgetRequest;
 use App\Http\Requests\OtpRequest;
@@ -160,13 +161,13 @@ class AuthController extends Controller
         }
 
         $order = $user->orders()->latest()->first();
-        $subcription = Subscription::where('user_id',$user->id)->first();
+        $subcription = Subscription::where('user_id', $user->id)->first();
         if ($order) {
             $lastPayment = $order->payments()->latest()->first();
 
             $paymentStatus = $lastPayment ? $lastPayment->status : 'pending';
             // Fetch the latest subscription
-           
+
 
             return response()->json([
                 'status' => 'success',
@@ -355,5 +356,41 @@ class AuthController extends Controller
             'status' => 'success',
             'message' => 'Account deleted successfully'
         ]);
+    }
+
+    public function profileUpdate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string',
+            'email' => 'nullable|string|email|unique:users',
+            'avatar' => 'nullable|image',
+            'occupation' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Handle image upload if there is an avatar
+        $imagePath = null;
+        if ($request->hasFile('avatar')) {
+            $imagePath = ImageHelper::handleImageUpload($request->file('avatar'), null, 'avatar');
+        }
+
+        // Find the authenticated user
+        $user = User::find(auth()->user()->id);
+
+        // Update user details
+        $user->name = $request->name ?? $user->name; // Only update if provided
+        $user->email = $request->email ?? $user->email; // Only update if provided
+        $user->avartar = $imagePath ?? $user->avatar; // Only update avatar if provided
+        $user->occipation = $request->occupation ?? $user->occipation; // Only update if provided
+        $user->save();
+
+        return $this->success($user,'Information Update Successfully!',200);
     }
 }

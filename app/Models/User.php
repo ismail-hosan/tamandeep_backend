@@ -13,13 +13,20 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-
+    protected $appends = ['avartar_image'];
     protected $fillable = [
         'name',
         'email',
         'password',
         'stripe_id',
+        'avatar',
+        'occipation'
     ];
+
+    public function getAvartarImageAttribute()
+    {
+        return url($this->avartar);  
+    }
 
 
     protected $hidden = [

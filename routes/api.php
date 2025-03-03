@@ -41,6 +41,7 @@ Route::post('/password/update', [AuthController::class, 'passwordUpdate']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/check', [AuthController::class, 'check']);
     Route::get('/logout', [AuthController::class, 'logout']);
+    Route::post('/profile/update', [AuthController::class, 'profileUpdate']);
     Route::delete('/delete-account', [AuthController::class, 'deleteAccount']);
     Route::post('/action/store', [ActionController::class, 'store']);
     Route::get('/action/show/{id}', [ActionController::class, 'show']);
@@ -48,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/action/delete', [ActionController::class, 'delete']);
     Route::post('/action/update', [ActionController::class, 'update']);
     Route::post('/action/edit', [ActionController::class, 'edit']);
+   
 
 
     Route::get('/user/card', [UserController::class, 'index']);
