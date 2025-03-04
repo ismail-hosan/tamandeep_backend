@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('order_item_id'); 
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
-            $table->string('compmay_name')->nullable();
+            $table->string('company_name')->nullable();
             $table->string('job_title')->nullable();
             $table->string('industry')->nullable();
             $table->string('birthday')->nullable();

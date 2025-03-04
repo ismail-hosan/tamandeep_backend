@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\Contact;
+use App\Models\Contact as cont;
 use App\Traits\apiresponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -66,7 +67,7 @@ class ContactController extends Controller
         }
 
         // Save the contact to the database
-        $contact = Contact::create([
+        $contact = cont::create([
             'order_item_id' => $request->order_item_id,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
