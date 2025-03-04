@@ -49,6 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/action/delete', [ActionController::class, 'delete']);
     Route::post('/action/update', [ActionController::class, 'update']);
     Route::post('/action/edit', [ActionController::class, 'edit']);
+    Route::get('/taps/ditails/{id}', [QrcodeController::class, 'tapsData']);
    
 
 

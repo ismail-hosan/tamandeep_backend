@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\OrderItem;
+use App\Models\Tap;
 use App\Models\User;
 use App\Traits\apiresponse;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Contracts\Encryption\DecryptException;
+use function PHPUnit\Framework\returnArgument;
 
 class QrcodeController extends Controller
 {
@@ -36,6 +38,8 @@ class QrcodeController extends Controller
             return $this->error([],'Action Not Found!',400);
         }
 
+        $this->taps($orderItem->id);
+
         // Decode the JSON data field into a PHP array
         if (isset($orderItem->data)) {
             $orderItem->data = json_decode($orderItem->data, true);  // Decoding to an associative array
@@ -43,6 +47,28 @@ class QrcodeController extends Controller
 
         // Return the result as JSON
         return $this->success($orderItem,'Data Fetch Successfully!',200);
+    }
+
+
+    private function taps($order_items_id)
+    {
+        Tap::create([
+            'order_items_id'=>$order_items_id,
+            'date'=>now(),
+        ]);
+    }
+
+
+    public function tapsData($id)
+    {
+        $data = Tap::where('order_item_id',$id)->get();
+
+        if(!$data)
+        {
+            return $this->error([],'Data Not Found!');
+        }
+
+        return $this->success($data,'Data Fetch Successfully!',200);
     }
 
 
