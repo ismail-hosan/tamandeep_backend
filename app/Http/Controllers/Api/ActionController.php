@@ -40,10 +40,10 @@ class ActionController extends Controller
         }
 
         // Check if order item exists
-        // $res = $this->check($request->order_item_id);
-        // if ($res) {
-        //     return $res;
-        // }
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
         $orderItemExists = OrderItem::find($request->order_item_id); // Example check
         if (!$orderItemExists) {
             return response()->json([
@@ -92,10 +92,10 @@ class ActionController extends Controller
 
     public function show($id)
     {
-        // $res = $this->check($id);
-        // if ($res) {
-        //     return $res;
-        // }
+        $res = $this->check($id);
+        if ($res) {
+            return $res;
+        }
         $data = OrderItem::with(['product.data', 'qrcodes'])->find($id);
 
         // Check if user exists
@@ -111,12 +111,12 @@ class ActionController extends Controller
             // 'user' => $data->only(['id', 'name', 'email']),
             'qrcode' => $data->qrcodes ? Storage::url($data->qrcodes->file_path) : null,
             'product_types' => $data->product->map(function ($product) {
-                return $product->data->map(function ($dataEntry,$index) {
+                return $product->data->map(function ($dataEntry, $index) {
                     $decodedData = json_decode($dataEntry->data, true); // `true` for associative array
                     $typeBasedIndex = $dataEntry->Category->name . '#' . ($index + 1);
                     return array_merge([
                         'id' => $dataEntry->id,
-                        'title'=>$typeBasedIndex,
+                        'title' => $typeBasedIndex,
                         'type' => $dataEntry->Category->name,
                         'active' => $dataEntry->active,
                     ], $decodedData);
@@ -148,10 +148,10 @@ class ActionController extends Controller
             ], 422);
         }
 
-        // $res = $this->check($request->order_item_id);
-        // if ($res) {
-        //     return $res;
-        // }
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
 
         $dataEntry = Data::find($request->action_id);
         if (!$dataEntry) {
@@ -290,10 +290,10 @@ class ActionController extends Controller
         }
 
         // Check if order item exists
-        // $res = $this->check($request->order_item_id);
-        // if ($res) {
-        //     return $res;
-        // }
+        $res = $this->check($request->order_item_id);
+        if ($res) {
+            return $res;
+        }
 
         $data = Data::find($request->action_id);
         $data['data'] = json_decode($data->data, true);
@@ -307,19 +307,22 @@ class ActionController extends Controller
     private function check($order_item_id)
     {
         $user = auth()->user();
-        if (!$user) {
-            return $this->error([], 'User not authenticated', 401);
-        }
-        if (!$user->orders()->exists()) {
-            return $this->error([], 'Order not found for this user', 404); // 404 Not Found
-        }
-        $order = $user->orders()->first();
-        $orderItem = $order->items()->where('id', $order_item_id)->first();
 
-        if (!$orderItem) {
-            return $this->error([], 'Order item not found or does not belong to this user\'s order', 404); // 404 Not Found
+        if (!$user) {
+            return $this->error([], 'User not authenticated', 401);  // User is not authenticated
         }
-        return null;
+
+        // Look for the order item in any of the user's orders
+        $orderItem = $user->orders()->whereHas('items', function ($query) use ($order_item_id) {
+            $query->where('id', $order_item_id);
+        })->exists();
+
+        // If no matching order is found
+        if (!$orderItem) {
+            return $this->error([], 'Order item not found or does not belong to this user\'s order', 404);  // 404 Not Found
+        }
+
+        return null;  // Everything is fine, no error
     }
 
 
