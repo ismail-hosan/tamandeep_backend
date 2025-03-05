@@ -53,6 +53,7 @@ class ContactController extends Controller
             'industry' => 'nullable|string|max:255',
             'birthday' => 'nullable|date',
             'phone_home' => ['nullable', 'regex:/^(\+?[\d\s-]{10,})$/'],
+            'phone_office' => ['nullable', 'regex:/^(\+?[\d\s-]{10,})$/'],
             'website' => 'nullable|string|url',
             'address' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255',
@@ -79,6 +80,7 @@ class ContactController extends Controller
             'website' => $request->website,
             'address' => $request->address,
             'email' => $request->email,
+            'phone_office' => $request->phone_office,
         ]);
 
         return $this->success($contact, 'Data Store Successfully!', 200);

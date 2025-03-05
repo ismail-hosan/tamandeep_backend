@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('job_title')->nullable();
             $table->string('industry')->nullable();
             $table->string('birthday')->nullable();
-            $table->string('Phone_home')->nullable();
+            $table->string('phone_home')->nullable();
+            $table->string('phone_office')->nullable();
             $table->string('email')->nullable();
             $table->string('website')->nullable();
             $table->longText('address')->nullable();
