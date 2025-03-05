@@ -89,10 +89,10 @@ class ContactController extends Controller
     public function contactShow($id)
     {
         // Check if order item exists
-        $res = $this->check($id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($id);
+        // if ($res) {
+        //     return $res;
+        // }
 
         $contact = cont::where('order_item_id', $id)->get();
         if (!$contact) {

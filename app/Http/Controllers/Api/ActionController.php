@@ -92,10 +92,10 @@ class ActionController extends Controller
 
     public function show($id)
     {
-        $res = $this->check($id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($id);
+        // if ($res) {
+        //     return $res;
+        // }
         $data = OrderItem::with(['product.data', 'qrcodes'])->find($id);
 
         // Check if user exists
@@ -148,10 +148,10 @@ class ActionController extends Controller
             ], 422);
         }
 
-        $res = $this->check($request->order_item_id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($request->order_item_id);
+        // if ($res) {
+        //     return $res;
+        // }
 
         $dataEntry = Data::find($request->action_id);
         if (!$dataEntry) {
@@ -290,10 +290,10 @@ class ActionController extends Controller
         }
 
         // Check if order item exists
-        $res = $this->check($request->order_item_id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($request->order_item_id);
+        // if ($res) {
+        //     return $res;
+        // }
 
         $data = Data::find($request->action_id);
         $data['data'] = json_decode($data->data, true);
