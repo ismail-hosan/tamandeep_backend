@@ -40,10 +40,10 @@ class ActionController extends Controller
         }
 
         // Check if order item exists
-        $res = $this->check($request->order_item_id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($request->order_item_id);
+        // if ($res) {
+        //     return $res;
+        // }
         $orderItemExists = OrderItem::find($request->order_item_id); // Example check
         if (!$orderItemExists) {
             return response()->json([
