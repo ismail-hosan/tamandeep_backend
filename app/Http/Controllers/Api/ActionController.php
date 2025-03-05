@@ -111,11 +111,12 @@ class ActionController extends Controller
             // 'user' => $data->only(['id', 'name', 'email']),
             'qrcode' => $data->qrcodes ? Storage::url($data->qrcodes->file_path) : null,
             'product_types' => $data->product->map(function ($product) {
-                return $product->data->map(function ($dataEntry) {
+                return $product->data->map(function ($dataEntry,$index) {
                     $decodedData = json_decode($dataEntry->data, true); // `true` for associative array
-    
+                    $typeBasedIndex = $dataEntry->Category->name . '#' . ($index + 1);
                     return array_merge([
                         'id' => $dataEntry->id,
+                        'title'=>$typeBasedIndex,
                         'type' => $dataEntry->Category->name,
                         'active' => $dataEntry->active,
                     ], $decodedData);

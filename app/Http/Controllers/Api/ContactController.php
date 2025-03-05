@@ -81,6 +81,39 @@ class ContactController extends Controller
             'email' => $request->email,
         ]);
 
-        return $this->success($contact,'Data Store Successfully!',200);
+        return $this->success($contact, 'Data Store Successfully!', 200);
+    }
+
+    public function contactShow($id)
+    {
+        // Check if order item exists
+        $res = $this->check($id);
+        if ($res) {
+            return $res;
+        }
+
+        $contact = cont::where('order_item_id', $id)->get();
+        if (!$contact) {
+            return $this->error([], 'Data Not Found');
+        }
+        return $this->success($contact, 'Data Fetch Successfully!', 200);
+    }
+
+    private function check($order_item_id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return $this->error([], 'User not authenticated', 401);
+        }
+        if (!$user->orders()->exists()) {
+            return $this->error([], 'Order not found for this user', 404); // 404 Not Found
+        }
+        $order = $user->orders()->first();
+        $orderItem = $order->items()->where('id', $order_item_id)->first();
+
+        if (!$orderItem) {
+            return $this->error([], 'Order item not found or does not belong to this user\'s order', 404); // 404 Not Found
+        }
+        return null;
     }
 }

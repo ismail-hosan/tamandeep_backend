@@ -29,4 +29,9 @@ class OrderItem extends Model
     {
         return $this->hasMany(Product_Type::class, 'order_item_id');
     }
+
+    public function taps()
+    {
+        return $this->hasMany(Tap::class);
+    }
 }
