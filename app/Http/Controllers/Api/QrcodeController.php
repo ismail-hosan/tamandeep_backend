@@ -21,31 +21,29 @@ class QrcodeController extends Controller
 
     public function view($code)
     {
-        // Raw DB query to fetch the specific order item based on $code (assuming it corresponds to unique_code)
+        \Log::info("View method called with code: " . $code);
+
+        // Raw DB query to fetch the specific order item
         $orderItem = DB::table('order_items')
-            ->select(
-                'order_items.id',  // Select the id column from order_items
-                'order_items.unique_code',
-                'product__types.name',
-                'data.data'
-            )
-            ->join('product__types', 'order_items.id', '=', 'product__types.order_item_id')  // Join order_items to product__types on order_item_id
-            ->join('data', 'product__types.id', '=', 'data.category_id')  // Join product__types to data on category_id
+            ->select('order_items.id', 'order_items.unique_code', 'product__types.name', 'data.data')
+            ->join('product__types', 'order_items.id', '=', 'product__types.order_item_id')
+            ->join('data', 'product__types.id', '=', 'data.category_id')
             ->where('data.active', 1)
             ->where('order_items.unique_code', $code)
             ->first();
 
         if (!$orderItem) {
+            \Log::error("Order item not found for unique code: " . $code);
             return $this->error([], 'Action Not Found!', 400);
         }
 
         // Decode the JSON data field into a PHP array
         if (isset($orderItem->data)) {
-            $orderItem->data = json_decode($orderItem->data, true);  // Decoding to an associative array
+            $orderItem->data = json_decode($orderItem->data, true);
         }
 
-
-        // Perform additional logic (assuming this method exists and you want to process the id)
+        // Call the taps function
+        \Log::info("Calling taps with Order Item ID: " . $orderItem->id);
         $this->taps($orderItem->id);
 
         // Return the result as JSON
@@ -55,18 +53,26 @@ class QrcodeController extends Controller
 
     private function taps($order_items_id)
     {
-        Tap::create([
-            'order_item_id' => $order_items_id,
-            'date' => now(),
-        ]);
+        try {
+            \Log::info("Creating tap for order item ID: " . $order_items_id);  // Log the order item ID
+            $tap = Tap::create([
+                'order_item_id' => $order_items_id,
+                'date' => now(),
+            ]);
+            \Log::info("Tap created: " . $tap);  // Log the created tap object
+        } catch (\Exception $e) {
+            \Log::error("Error creating tap: " . $e->getMessage());  // Log error if there's an issue
+            return $this->error([], 'Failed to create tap', 500);  // Return error response
+        }
     }
+
 
     public function tapsData($id)
     {
-        $res = $this->check($id);
-        if ($res) {
-            return $res;
-        }
+        // $res = $this->check($id);
+        // if ($res) {
+        //     return $res;
+        // }
         $data = Tap::where('order_item_id', $id)->get();
 
         if (!$data) {
