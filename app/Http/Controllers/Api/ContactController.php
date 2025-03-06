@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\Contact;
 use App\Models\Contact as cont;
+use App\Models\Paypal;
 use App\Traits\apiresponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -99,6 +100,27 @@ class ContactController extends Controller
             return $this->error([], 'Data Not Found');
         }
         return $this->success($contact, 'Data Fetch Successfully!', 200);
+    }
+
+    public function addPaypal(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'website' => 'nullable|string|url',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $url = new Paypal();
+        $url->url = $request->website;
+        $url->save();
+
+        return $this->success($url,'Data Store Successfully!',200);
     }
 
     private function check($order_item_id)
